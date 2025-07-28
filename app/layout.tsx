@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { SessionProvider } from "@/components/providers/session-provider";
+import { DragDropProvider } from "@/components/providers/drag-drop-provider";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -41,7 +42,9 @@ export default function RootLayout({
         <ErrorBoundary>
           <SessionProvider>
             <QueryProvider>
-              {children}
+              <DragDropProvider>
+                {children}
+              </DragDropProvider>
               <Toaster 
                 position="top-right"
                 toastOptions={{

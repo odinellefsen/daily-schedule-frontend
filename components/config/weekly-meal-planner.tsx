@@ -20,6 +20,7 @@ import { useConfigStore } from '@/lib/stores/config-store'
 import { MealWithDetails } from '@/lib/types/api'
 import { cn } from '@/lib/utils'
 import { MealCreationModal } from './meal-creation-modal'
+import { MealDetailModal } from './meal-detail-modal'
 
 interface MealCardProps {
   meal: MealWithDetails
@@ -91,6 +92,8 @@ export function WeeklyMealPlanner() {
   const [currentWeek, setCurrentWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>()
+  const [showDetailModal, setShowDetailModal] = useState(false)
+  const [selectedMeal, setSelectedMeal] = useState<MealWithDetails | null>(null)
   const { 
     weeklyMeals, 
     mealsLoading, 
@@ -122,8 +125,8 @@ export function WeeklyMealPlanner() {
   }
 
   const handleEditMeal = (meal: MealWithDetails) => {
-    console.log('Edit meal:', meal.id)
-    // TODO: Open meal editing modal
+    setSelectedMeal(meal)
+    setShowDetailModal(true)
   }
 
   // Generate week days
@@ -322,6 +325,13 @@ export function WeeklyMealPlanner() {
         open={showCreateModal} 
         onOpenChange={setShowCreateModal}
         defaultDate={selectedDate}
+      />
+      
+      {/* Meal Detail Modal */}
+      <MealDetailModal 
+        open={showDetailModal} 
+        onOpenChange={setShowDetailModal}
+        meal={selectedMeal}
       />
     </Card>
   )

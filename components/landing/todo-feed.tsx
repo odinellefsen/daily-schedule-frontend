@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useDroppable } from '@dnd-kit/core'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -13,12 +14,43 @@ import {
   AlertCircle,
   CheckCircle2,
   Calendar,
-  Sparkles
+  Sparkles,
+  Target
 } from 'lucide-react'
 import Link from 'next/link'
 import { TodoItem } from './todo-item'
 import { QuickTodoForm } from './quick-todo-form'
 import { useLandingStore } from '@/lib/stores/landing-store'
+
+function TodoDropZone() {
+  const { isOver, setNodeRef } = useDroppable({
+    id: 'todo-drop-zone',
+    data: {
+      type: 'todo-drop-zone',
+      date: new Date().toISOString().split('T')[0],
+      dateLabel: 'today'
+    }
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 ${
+        isOver 
+          ? 'border-primary bg-primary/10 scale-105' 
+          : 'border-muted-foreground/30 hover:border-primary/50'
+      }`}
+    >
+      <Target className={`h-8 w-8 mx-auto mb-2 ${isOver ? 'text-primary' : 'text-muted-foreground'}`} />
+      <p className={`text-sm font-medium ${isOver ? 'text-primary' : 'text-muted-foreground'}`}>
+        {isOver ? 'Release to add cooking step' : 'Drop cooking steps here'}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1">
+        Drag meal steps from your planning area to schedule them
+      </p>
+    </div>
+  )
+}
 
 export function TodoFeed() {
   const { 
@@ -178,6 +210,9 @@ export function TodoFeed() {
           ))}
         </div>
       )}
+
+      {/* Drop zone for meal steps */}
+      <TodoDropZone />
 
       {/* Completed todos (collapsible section) */}
       {completedTodos.length > 0 && (
