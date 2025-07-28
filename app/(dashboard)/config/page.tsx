@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Settings, Calendar, BookOpen, Database, ListTodo, Home } from "lucide-react"
 import Link from "next/link"
+import { WeeklyMealPlanner } from "@/components/config/weekly-meal-planner"
+import { RecipeLibrary } from "@/components/config/recipe-library"
+// import { FoodDatabase } from "@/components/config/food-database" // Temporarily disabled - type fix needed
 
 export default function ConfigurationPage() {
   return (
@@ -61,43 +64,11 @@ export default function ConfigurationPage() {
           </TabsList>
 
           <TabsContent value="meals" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Weekly Meal Planning
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="py-12 text-center space-y-4">
-                <Calendar className="h-12 w-12 text-muted-foreground mx-auto" />
-                <h3 className="text-lg font-semibold">Meal Planning Hub</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Plan your weekly meals, create recipe snapshots, and generate cooking schedules. 
-                  This is where the magic happens - 20 minutes on Sunday saves hours during the week.
-                </p>
-                <Badge variant="outline">Coming in Phase 4</Badge>
-              </CardContent>
-            </Card>
+            <WeeklyMealPlanner />
           </TabsContent>
 
           <TabsContent value="recipes" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  Recipe Library
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="py-12 text-center space-y-4">
-                <BookOpen className="h-12 w-12 text-muted-foreground mx-auto" />
-                <h3 className="text-lg font-semibold">Recipe Management</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Build your recipe collection with versioning support. Each recipe becomes a template 
-                  that gets snapshotted when used in meal planning.
-                </p>
-                <Badge variant="outline">Coming in Phase 4</Badge>
-              </CardContent>
-            </Card>
+            <RecipeLibrary />
           </TabsContent>
 
           <TabsContent value="food" className="space-y-6">
@@ -110,12 +81,12 @@ export default function ConfigurationPage() {
               </CardHeader>
               <CardContent className="py-12 text-center space-y-4">
                 <Database className="h-12 w-12 text-muted-foreground mx-auto" />
-                <h3 className="text-lg font-semibold">Nutritional Foundation</h3>
+                <h3 className="text-lg font-semibold">Food Database</h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
-                  Build your food database progressively. Start simple with text ingredients, 
-                  add nutritional precision over time as needed.
+                  Food database component created but needs type adjustments. 
+                  Store returns FoodItem[] but component expects FoodItemWithUnits[].
                 </p>
-                <Badge variant="outline">Coming in Phase 4</Badge>
+                <Badge variant="outline">Type fix needed</Badge>
               </CardContent>
             </Card>
           </TabsContent>

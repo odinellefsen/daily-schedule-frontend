@@ -1,0 +1,384 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { 
+  Database, 
+  Search, 
+  Plus, 
+  Scale,
+  RefreshCw,
+  AlertCircle,
+  Apple,
+  Package
+} from 'lucide-react'
+import { useConfigStore } from '@/lib/stores/config-store'
+import { FoodItem, FoodItemWithUnits } from '@/lib/types/api'
+import { cn } from '@/lib/utils'
+
+interface FoodItemCardProps {
+  foodItem: FoodItemWithUnits
+  onView: (foodItem: FoodItemWithUnits) => void
+}
+
+function FoodItemCard({ foodItem, onView }: FoodItemCardProps) {
+  return (
+    <Card 
+      className="cursor-pointer hover:shadow-md transition-all duration-200"
+      onClick={() => onView(foodItem)}
+    >
+      <CardContent className="p-4">
+                 <div className="space-y-3">
+           <div className="space-y-1">
+             <h4 className="text-sm font-medium line-clamp-2">{foodItem.name}</h4>
+             {foodItem.categoryHierarchy && foodItem.categoryHierarchy.length > 0 && (
+               <p className="text-xs text-muted-foreground line-clamp-2">
+                 {foodItem.categoryHierarchy.join(' > ')}
+               </p>
+             )}
+           </div>
+           
+           <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+             <div className="flex items-center gap-1">
+               <Apple className="h-3 w-3" />
+               Food Item
+             </div>
+             
+             {foodItem.units && foodItem.units.length > 0 && (
+               <div className="flex gap-1 flex-wrap">
+                 {foodItem.units.slice(0, 3).map((unit, index) => (
+                   <Badge key={index} variant="outline" className="text-xs">
+                     {unit.unitOfMeasurement}
+                   </Badge>
+                 ))}
+                 {foodItem.units.length > 3 && (
+                   <Badge variant="outline" className="text-xs">
+                     +{foodItem.units.length - 3}
+                   </Badge>
+                 )}
+               </div>
+             )}
+           </div>
+
+           {/* Nutritional Info Summary - from first unit */}
+           {foodItem.units && foodItem.units.length > 0 && foodItem.units[0] && (
+             <div className="grid grid-cols-2 gap-2 text-xs">
+               {foodItem.units[0].calories && (
+                 <div className="flex justify-between">
+                   <span className="text-muted-foreground">Calories:</span>
+                   <span>{foodItem.units[0].calories}</span>
+                 </div>
+               )}
+               {foodItem.units[0].proteinInGrams && (
+                 <div className="flex justify-between">
+                   <span className="text-muted-foreground">Protein:</span>
+                   <span>{foodItem.units[0].proteinInGrams}g</span>
+                 </div>
+               )}
+               {foodItem.units[0].carbohydratesInGrams && (
+                 <div className="flex justify-between">
+                   <span className="text-muted-foreground">Carbs:</span>
+                   <span>{foodItem.units[0].carbohydratesInGrams}g</span>
+                 </div>
+               )}
+               {foodItem.units[0].fatInGrams && (
+                 <div className="flex justify-between">
+                   <span className="text-muted-foreground">Fat:</span>
+                   <span>{foodItem.units[0].fatInGrams}g</span>
+                 </div>
+               )}
+             </div>
+           )}
+
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">
+              {foodItem.units?.length || 0} unit{(foodItem.units?.length || 0) !== 1 ? 's' : ''}
+            </span>
+            <Button size="sm" variant="ghost" className="h-6 text-xs">
+              View Details
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export function FoodDatabase() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterNutrition, setFilterNutrition] = useState<string>('')
+  
+  const { 
+    foodItems, 
+    foodItemsLoading, 
+    foodItemsError, 
+    fetchFoodItems,
+    clearFoodItemsError 
+  } = useConfigStore()
+
+  useEffect(() => {
+    fetchFoodItems()
+  }, [fetchFoodItems])
+
+  const handleRefresh = () => {
+    clearFoodItemsError()
+    fetchFoodItems()
+  }
+
+  const handleCreateFoodItem = () => {
+    console.log('Create new food item')
+    // TODO: Open food item creation modal
+  }
+
+  const handleViewFoodItem = (foodItem: FoodItemWithUnits) => {
+    console.log('View food item:', foodItem.id)
+    // TODO: Open food item details modal
+  }
+
+  // Filter food items based on search
+  const filteredFoodItems = foodItems.filter(foodItem => {
+    const matchesSearch = searchQuery === '' || 
+      foodItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (foodItem.categoryHierarchy && 
+       foodItem.categoryHierarchy.join(' ').toLowerCase().includes(searchQuery.toLowerCase()))
+    
+    const matchesNutrition = filterNutrition === '' || (() => {
+      // Check nutritional info from first unit if available
+      const firstUnit = foodItem.units?.[0]
+      if (!firstUnit) return false
+      
+      switch(filterNutrition) {
+        case 'high-protein':
+          return (firstUnit.proteinInGrams || 0) > 10
+        case 'low-carb':
+          return (firstUnit.carbohydratesInGrams || 0) < 5
+        case 'high-fat':
+          return (firstUnit.fatInGrams || 0) > 15
+        case 'low-calorie':
+          return (firstUnit.calories || 0) < 200
+        default:
+          return true
+      }
+    })()
+    
+    return matchesSearch && matchesNutrition
+  })
+
+  if (foodItemsLoading && foodItems.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="h-5 w-5 animate-pulse" />
+            Food Database
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Search bar skeleton */}
+            <div className="flex gap-2">
+              <Skeleton className="h-10 flex-1" />
+              <Skeleton className="h-10 w-32" />
+              <Skeleton className="h-10 w-32" />
+            </div>
+            
+            {/* Food item cards skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-full" />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-3 w-full" />
+                      </div>
+                      <div className="flex gap-2">
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Database className="h-5 w-5" />
+          Food Database
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Error Alert */}
+        {foodItemsError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{foodItemsError}</span>
+              <Button variant="outline" size="sm" onClick={handleRefresh}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Search and Filters */}
+        <div className="flex gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-[250px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search food items by name or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <select
+            value={filterNutrition}
+            onChange={(e) => setFilterNutrition(e.target.value)}
+            className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="">All nutrition</option>
+            <option value="high-protein">High Protein (&gt;10g)</option>
+            <option value="low-carb">Low Carb (&lt;5g)</option>
+            <option value="high-fat">High Fat (&gt;15g)</option>
+            <option value="low-calorie">Low Calorie (&lt;200 cal)</option>
+          </select>
+          
+          <Button onClick={handleCreateFoodItem}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Food Item
+          </Button>
+        </div>
+
+        {/* Results Summary */}
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div>
+            {searchQuery || filterNutrition ? (
+              <span>
+                {filteredFoodItems.length} food item{filteredFoodItems.length !== 1 ? 's' : ''} found
+                {searchQuery && ` for "${searchQuery}"`}
+                {filterNutrition && ` with ${filterNutrition.replace('-', ' ')}`}
+              </span>
+            ) : (
+              <span>{foodItems.length} food item{foodItems.length !== 1 ? 's' : ''} total</span>
+            )}
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={foodItemsLoading}
+          >
+            <RefreshCw className={cn("h-4 w-4", foodItemsLoading && "animate-spin")} />
+          </Button>
+        </div>
+
+        {/* Food Items Grid */}
+        {filteredFoodItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredFoodItems.map((foodItem) => (
+              <FoodItemCard
+                key={foodItem.id}
+                foodItem={foodItem}
+                onView={handleViewFoodItem}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 space-y-4">
+            {searchQuery || filterNutrition ? (
+              <>
+                <Database className="h-12 w-12 text-muted-foreground mx-auto opacity-50" />
+                <div>
+                  <h3 className="text-lg font-medium">No food items found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your search or filter criteria.
+                  </p>
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearchQuery('')
+                      setFilterNutrition('')
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                  <Button onClick={handleCreateFoodItem}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Food Item
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Package className="h-12 w-12 text-muted-foreground mx-auto opacity-50" />
+                <div>
+                  <h3 className="text-lg font-medium">No food items yet</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto">
+                    Build your food database to use in recipes and meal planning. Add nutritional information and units for precise cooking.
+                  </p>
+                </div>
+                <Button onClick={handleCreateFoodItem}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Food Item
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Quick Stats */}
+        {foodItems.length > 0 && (
+          <div className="border-t pt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
+              <div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {foodItems.length}
+                </div>
+                <div className="text-muted-foreground">Total Items</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-600">
+                  {foodItems.reduce((total, item) => total + (item.units?.length || 0), 0)}
+                </div>
+                <div className="text-muted-foreground">Total Units</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">
+                  {foodItems.filter(item => (item.proteinInGrams || 0) > 10).length}
+                </div>
+                <div className="text-muted-foreground">High Protein</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-purple-600">
+                  {foodItems.filter(item => item.units?.some(u => u.unitName.toLowerCase().includes('cup') || u.unitName.toLowerCase().includes('gram'))).length}
+                </div>
+                <div className="text-muted-foreground">With Standard Units</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+} 
