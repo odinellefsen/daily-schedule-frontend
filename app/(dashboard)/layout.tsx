@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Settings, Home, Clock } from "lucide-react"
+import { Settings, Home, Clock, LogOut, User } from "lucide-react"
+import { UserMenu } from "@/components/shared/user-menu"
 import Link from "next/link"
 
 export default function DashboardLayout({
@@ -41,10 +42,7 @@ export default function DashboardLayout({
               
               <Separator orientation="vertical" className="h-6" />
               
-              {/* User menu will be added in Phase 2 */}
-              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                <span className="text-xs font-medium">U</span>
-              </div>
+              <UserMenu />
             </div>
           </div>
         </div>

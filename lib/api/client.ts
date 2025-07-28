@@ -36,12 +36,24 @@ class ApiClient {
     }
 
     private async getAuthTokenFromSession(): Promise<string | null> {
-        // This will be implemented when we add NextAuth
-        // For now, return a placeholder
+        // Get the auth token from NextAuth session
         if (typeof window !== "undefined") {
-            return localStorage.getItem("auth_token");
+            // Client-side: get from session via API call
+            try {
+                const response = await fetch("/api/auth/session");
+                if (response.ok) {
+                    const session = await response.json();
+                    return session?.accessToken || null;
+                }
+            } catch (error) {
+                console.error("Failed to get session:", error);
+            }
+            return null;
+        } else {
+            // Server-side: use auth() function
+            const { getAccessToken } = await import("@/lib/auth");
+            return await getAccessToken();
         }
-        return null;
     }
 
     private async request<T>(
