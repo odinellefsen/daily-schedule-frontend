@@ -19,6 +19,7 @@ import { format, startOfWeek, addDays, isSameDay } from 'date-fns'
 import { useConfigStore } from '@/lib/stores/config-store'
 import { MealWithDetails } from '@/lib/types/api'
 import { cn } from '@/lib/utils'
+import { MealCreationModal } from './meal-creation-modal'
 
 interface MealCardProps {
   meal: MealWithDetails
@@ -88,6 +89,8 @@ function MealCard({ meal, onEdit }: MealCardProps) {
 
 export function WeeklyMealPlanner() {
   const [currentWeek, setCurrentWeek] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>()
   const { 
     weeklyMeals, 
     mealsLoading, 
@@ -114,8 +117,8 @@ export function WeeklyMealPlanner() {
   }
 
   const handleAddMeal = (date: Date) => {
-    console.log('Add meal for:', format(date, 'yyyy-MM-dd'))
-    // TODO: Open meal creation modal
+    setSelectedDate(date)
+    setShowCreateModal(true)
   }
 
   const handleEditMeal = (meal: MealWithDetails) => {
@@ -313,6 +316,13 @@ export function WeeklyMealPlanner() {
           </div>
         )}
       </CardContent>
+      
+      {/* Meal Creation Modal */}
+      <MealCreationModal 
+        open={showCreateModal} 
+        onOpenChange={setShowCreateModal}
+        defaultDate={selectedDate}
+      />
     </Card>
   )
 } 

@@ -20,6 +20,7 @@ import {
 import { useConfigStore } from '@/lib/stores/config-store'
 import { Recipe } from '@/lib/types/api'
 import { cn } from '@/lib/utils'
+import { RecipeCreationModal } from './recipe-creation-modal'
 
 interface RecipeCardProps {
   recipe: Recipe
@@ -82,6 +83,7 @@ function RecipeCard({ recipe, onView }: RecipeCardProps) {
 export function RecipeLibrary() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTiming, setFilterTiming] = useState<string>('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
   
   const { 
     recipes, 
@@ -101,8 +103,7 @@ export function RecipeLibrary() {
   }
 
   const handleCreateRecipe = () => {
-    console.log('Create new recipe')
-    // TODO: Open recipe creation modal
+    setShowCreateModal(true)
   }
 
   const handleViewRecipe = (recipe: Recipe) => {
@@ -338,6 +339,12 @@ export function RecipeLibrary() {
           </div>
         )}
       </CardContent>
+      
+      {/* Recipe Creation Modal */}
+      <RecipeCreationModal 
+        open={showCreateModal} 
+        onOpenChange={setShowCreateModal} 
+      />
     </Card>
   )
 } 
