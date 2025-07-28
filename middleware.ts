@@ -4,9 +4,8 @@ import { auth } from "@/lib/auth";
 
 // Define public routes that don't require authentication
 const publicRoutes = [
-    "/auth/login",
-    "/auth/signup",
-    "/auth/error",
+    "/login",
+    "/signup",
     "/api/auth", // NextAuth API routes
 ];
 
@@ -42,7 +41,7 @@ export async function middleware(request: NextRequest) {
 
             if (!session || !session.user) {
                 // Redirect to login with callback URL
-                const loginUrl = new URL("/auth/login", request.url);
+                const loginUrl = new URL("/login", request.url);
                 loginUrl.searchParams.set("callbackUrl", pathname);
                 return NextResponse.redirect(loginUrl);
             }
@@ -52,7 +51,7 @@ export async function middleware(request: NextRequest) {
         } catch (error) {
             console.error("Middleware auth error:", error);
             // Redirect to login on auth error
-            const loginUrl = new URL("/auth/login", request.url);
+            const loginUrl = new URL("/login", request.url);
             loginUrl.searchParams.set("callbackUrl", pathname);
             return NextResponse.redirect(loginUrl);
         }

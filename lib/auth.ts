@@ -1,7 +1,10 @@
 import NextAuth from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { apiClient } from "./api/client";
+import { apiClient } from "@/lib/api/client";
+
+// Mock mode for development - set to true to bypass backend auth
+const MOCK_AUTH_MODE = true;
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -39,11 +42,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 email: {
                     label: "Email",
                     type: "email",
-                    placeholder: "your@email.com",
+                    placeholder: "Enter your email",
                 },
                 password: {
                     label: "Password",
                     type: "password",
+                    placeholder: "Enter your password",
                 },
             },
             async authorize(credentials) {
@@ -52,9 +56,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 }
 
                 try {
-                    // This will be updated to call your actual Hono auth endpoint
+                    // Mock authentication for development
+                    if (MOCK_AUTH_MODE) {
+                        // Accept any email/password for demo purposes
+                        if (credentials.email && credentials.password) {
+                            return {
+                                id: "demo-user-123",
+                                email: credentials.email,
+                                name: "Demo User",
+                                image: null,
+                                accessToken: "demo-access-token-123",
+                            };
+                        }
+                        return null;
+                    }
+
+                    // Real authentication with Hono backend
                     const response = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+                        `${process.env.HONO_API_URL || "http://localhost:8000"}/api/auth/login`,
                         {
                             method: "POST",
                             headers: {
@@ -71,11 +90,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         return null;
                     }
 
-                    const user = await response.json();
+                    const data = await response.json();
 
-                    if (user && user.accessToken) {
+                    if (data.user && data.accessToken) {
+                        const user = data.user;
                         return {
-                            id: user.id || user.userId,
+                            id: user.id,
                             email: user.email,
                             name: user.name,
                             image: user.image,
@@ -86,6 +106,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     return null;
                 } catch (error) {
                     console.error("Authentication error:", error);
+                    if (MOCK_AUTH_MODE) {
+                        // Fallback to mock auth even on error
+                        return {
+                            id: "demo-user-123",
+                            email: credentials.email,
+                            name: "Demo User",
+                            image: null,
+                            accessToken: "demo-access-token-123",
+                        };
+                    }
                     return null;
                 }
             },
@@ -118,8 +148,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     pages: {
-        signIn: "/auth/login",
-        error: "/auth/error",
+        signIn: "/login",
+        error: "/login?error=auth_error",
     },
 
     debug: process.env.NODE_ENV === "development",
