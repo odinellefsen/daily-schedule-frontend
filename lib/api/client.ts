@@ -28,7 +28,7 @@ import {
 } from "@/lib/types/api";
 
 // Mock mode for development
-const MOCK_API_MODE = true;
+const MOCK_API_MODE = false;
 
 export class ApiError extends Error {
     constructor(
@@ -51,7 +51,7 @@ class ApiClient {
 
     constructor() {
         this.baseURL =
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
     }
 
     // Method to set client-side token from components

@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -15,12 +15,14 @@ import {
   CheckCircle2,
   Calendar,
   Sparkles,
-  Target
+  Target,
+  PartyPopper
 } from 'lucide-react'
 import Link from 'next/link'
 import { TodoItem } from './todo-item'
 import { QuickTodoForm } from './quick-todo-form'
 import { useLandingStore } from '@/lib/stores/landing-store'
+import { useClerkApi } from '@/lib/hooks/use-clerk-api'
 
 function TodoDropZone() {
   const { isOver, setNodeRef } = useDroppable({
@@ -57,12 +59,21 @@ export function TodoFeed() {
     todos, 
     loading, 
     error, 
+    counts,
     fetchTodos, 
     clearError,
     lastFetched 
   } = useLandingStore()
 
+  // Initialize Clerk authentication for API calls
+  const { isAuthenticated, isLoaded } = useClerkApi()
+
+  const [isQuickTodoOpen, setIsQuickTodoOpen] = useState(false)
+
   useEffect(() => {
+    // Only fetch todos when Clerk auth is loaded and user is authenticated
+    if (!isLoaded || !isAuthenticated) return
+
     // Fetch todos on component mount
     fetchTodos()
 
@@ -72,7 +83,7 @@ export function TodoFeed() {
     }, 5 * 60 * 1000)
 
     return () => clearInterval(interval)
-  }, [fetchTodos])
+  }, [fetchTodos, isLoaded, isAuthenticated])
 
   const handleRefresh = () => {
     clearError()

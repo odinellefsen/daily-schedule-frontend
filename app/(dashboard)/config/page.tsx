@@ -6,7 +6,7 @@ import { Settings, Calendar, BookOpen, Database, ListTodo, Home } from "lucide-r
 import Link from "next/link"
 import { WeeklyMealPlanner } from "@/components/config/weekly-meal-planner"
 import { RecipeLibrary } from "@/components/config/recipe-library"
-// import { FoodDatabase } from "@/components/config/food-database" // Temporarily disabled - type fix needed
+import { FoodDatabase } from "@/components/config/food-database"
 
 export default function ConfigurationPage() {
   return (
@@ -72,23 +72,7 @@ export default function ConfigurationPage() {
           </TabsContent>
 
           <TabsContent value="food" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5" />
-                  Food Database
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="py-12 text-center space-y-4">
-                <Database className="h-12 w-12 text-muted-foreground mx-auto" />
-                <h3 className="text-lg font-semibold">Food Database</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Food database component created but needs type adjustments. 
-                  Store returns FoodItem[] but component expects FoodItemWithUnits[].
-                </p>
-                <Badge variant="outline">Type fix needed</Badge>
-              </CardContent>
-            </Card>
+            <FoodDatabase />
           </TabsContent>
 
           <TabsContent value="todos" className="space-y-6">
