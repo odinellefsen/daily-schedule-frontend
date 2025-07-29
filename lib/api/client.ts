@@ -1,7 +1,9 @@
 // API Client for Daily Scheduler Hono Backend
 // Handles all HTTP communication with proper error handling and auth
 
-import { getSession } from "next-auth/react";
+// For client-side token access
+let clientToken: string | null = null;
+
 import {
     Todo,
     CreateTodoRequest,
@@ -20,6 +22,8 @@ import {
     CreateMealResponse,
     WeeklyMealsResponse,
     ApiResponse,
+    RecipeWithDetails,
+    FoodItemWithUnits,
 } from "@/lib/types/api";
 
 // Mock mode for development
@@ -49,13 +53,13 @@ class ApiClient {
             process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     }
 
+    // Method to set client-side token from components
+    setToken(token: string | null): void {
+        clientToken = token;
+    }
+
     private async getAuthToken(): Promise<string | null> {
-        try {
-            const session = await getSession();
-            return session?.accessToken || null;
-        } catch {
-            return null;
-        }
+        return clientToken;
     }
 
     private async request<T>(
@@ -167,51 +171,160 @@ class ApiClient {
 
         if (endpoint === "/api/meals/weekly" && method === "GET") {
             const today = new Date();
-            return [
-                {
-                    id: "meal-1",
-                    mealName: "Demo: Sunday Family Dinner",
-                    scheduledToBeEatenAt: today.toISOString(),
-                    timing: "DINNER",
-                    hasMealBeenConsumed: false,
-                    recipes: [
-                        {
-                            recipeName: "Demo: Grilled Chicken",
-                            scalingFactor: 1,
-                        },
-                    ],
-                    steps: [
-                        {
-                            id: "step-1",
-                            instruction: "Preheat grill to medium-high heat",
-                            estimatedDurationMinutes: 5,
-                            isStepCompleted: true,
-                            assignedToDate: null,
-                            todoId: null,
-                            mealId: "meal-1",
-                        },
-                        {
-                            id: "step-2",
-                            instruction: "Season chicken with salt and pepper",
-                            estimatedDurationMinutes: 5,
-                            isStepCompleted: false,
-                            assignedToDate: null,
-                            todoId: null,
-                            mealId: "meal-1",
-                        },
-                        {
-                            id: "step-3",
-                            instruction:
-                                "Grill chicken for 6-7 minutes per side",
-                            estimatedDurationMinutes: 15,
-                            isStepCompleted: false,
-                            assignedToDate: null,
-                            todoId: null,
-                            mealId: "meal-1",
-                        },
-                    ],
+            return {
+                meals: [
+                    {
+                        id: "meal-1",
+                        mealName: "Demo: Sunday Family Dinner",
+                        scheduledToBeEatenAt: today.toISOString(),
+                        timing: "DINNER",
+                        hasMealBeenConsumed: false,
+                        recipes: [
+                            {
+                                recipeName: "Demo: Grilled Chicken",
+                                scalingFactor: 1,
+                            },
+                        ],
+                        steps: [
+                            {
+                                id: "step-1",
+                                instruction:
+                                    "Preheat grill to medium-high heat",
+                                estimatedDurationMinutes: 5,
+                                isStepCompleted: true,
+                                assignedToDate: null,
+                                todoId: null,
+                                mealId: "meal-1",
+                            },
+                            {
+                                id: "step-2",
+                                instruction:
+                                    "Season chicken with salt and pepper",
+                                estimatedDurationMinutes: 5,
+                                isStepCompleted: false,
+                                assignedToDate: null,
+                                todoId: null,
+                                mealId: "meal-1",
+                            },
+                            {
+                                id: "step-3",
+                                instruction:
+                                    "Grill chicken for 6-7 minutes per side",
+                                estimatedDurationMinutes: 15,
+                                isStepCompleted: false,
+                                assignedToDate: null,
+                                todoId: null,
+                                mealId: "meal-1",
+                            },
+                        ],
+                    },
+                ],
+                summary: {
+                    totalMeals: 1,
+                    completedMeals: 0,
+                    upcomingMeals: 1,
+                    overdueSteps: 0,
                 },
-            ] as T;
+            } as T;
+        }
+
+        // Individual recipe requests
+        if (endpoint.startsWith("/api/recipes/") && method === "GET") {
+            const recipeId = endpoint.split("/").pop();
+            return {
+                id: recipeId,
+                userId: "user-1",
+                nameOfTheRecipe: "Demo: Chocolate Chip Cookies",
+                generalDescriptionOfTheRecipe:
+                    "Classic homemade cookies perfect for any occasion",
+                whenIsItConsumed: ["DESSERT"],
+                version: 1,
+                steps: [
+                    {
+                        id: "recipe-step-1",
+                        recipeId: recipeId,
+                        instruction: "Preheat oven to 375°F (190°C)",
+                        estimatedDurationMinutes: 5,
+                        sortOrder: 1,
+                    },
+                    {
+                        id: "recipe-step-2",
+                        recipeId: recipeId,
+                        instruction:
+                            "Mix flour, baking soda, and salt in a bowl",
+                        estimatedDurationMinutes: 5,
+                        sortOrder: 2,
+                    },
+                    {
+                        id: "recipe-step-3",
+                        recipeId: recipeId,
+                        instruction:
+                            "Cream butter and sugars, add eggs and vanilla",
+                        estimatedDurationMinutes: 10,
+                        sortOrder: 3,
+                    },
+                ],
+                ingredients: [
+                    {
+                        id: "recipe-ing-1",
+                        recipeId: recipeId,
+                        ingredientText: "2¼ cups all-purpose flour",
+                        sortOrder: 1,
+                    },
+                    {
+                        id: "recipe-ing-2",
+                        recipeId: recipeId,
+                        ingredientText: "1 cup butter, softened",
+                        sortOrder: 2,
+                    },
+                    {
+                        id: "recipe-ing-3",
+                        recipeId: recipeId,
+                        ingredientText: "1 cup chocolate chips",
+                        sortOrder: 3,
+                    },
+                ],
+            } as T;
+        }
+
+        // Food item with units requests
+        if (
+            endpoint.includes("/api/food-items/") &&
+            endpoint.endsWith("/units") &&
+            method === "GET"
+        ) {
+            const foodItemId = endpoint.split("/")[3]; // Extract ID from /api/food-items/{id}/units
+            return {
+                id: foodItemId,
+                name: "Demo: Chicken Breast",
+                categoryHierarchy: ["Protein", "Poultry", "Chicken"],
+                units: [
+                    {
+                        id: "unit-1",
+                        foodItemId: foodItemId,
+                        unitOfMeasurement: "gram",
+                        unitDescription: "per 100g serving",
+                        calories: 165,
+                        proteinInGrams: 31,
+                        carbohydratesInGrams: 0,
+                        fatInGrams: 3.6,
+                        fiberInGrams: 0,
+                        sugarInGrams: 0,
+                    },
+                    {
+                        id: "unit-2",
+                        foodItemId: foodItemId,
+                        unitOfMeasurement: "piece",
+                        unitDescription: "medium breast (150g)",
+                        calories: 248,
+                        proteinInGrams: 46.5,
+                        carbohydratesInGrams: 0,
+                        fatInGrams: 5.4,
+                        fiberInGrams: 0,
+                        sugarInGrams: 0,
+                    },
+                ],
+            } as T;
         }
 
         // Handle POST requests (creation)
@@ -279,8 +392,8 @@ class ApiClient {
         return this.request<Recipe[]>("/api/recipes");
     }
 
-    async getRecipe(id: string): Promise<Recipe> {
-        return this.request<Recipe>(`/api/recipes/${id}`);
+    async getRecipe(id: string): Promise<RecipeWithDetails> {
+        return this.request<RecipeWithDetails>(`/api/recipes/${id}`);
     }
 
     async createRecipe(data: CreateRecipeRequest): Promise<Recipe> {
@@ -315,6 +428,10 @@ class ApiClient {
         return this.request<FoodItem>(`/api/food-items/${id}`);
     }
 
+    async getFoodItemWithUnits(id: string): Promise<FoodItemWithUnits> {
+        return this.request<FoodItemWithUnits>(`/api/food-items/${id}/units`);
+    }
+
     async createFoodItem(data: CreateFoodItemRequest): Promise<FoodItem> {
         return this.request<FoodItem>("/api/food-items", {
             method: "POST",
@@ -333,13 +450,13 @@ class ApiClient {
     async getWeeklyMeals(
         startDate?: string,
         endDate?: string
-    ): Promise<MealWithDetails[]> {
+    ): Promise<WeeklyMealsResponse> {
         const params = new URLSearchParams();
         if (startDate) params.append("startDate", startDate);
         if (endDate) params.append("endDate", endDate);
 
         const query = params.toString() ? `?${params.toString()}` : "";
-        return this.request<MealWithDetails[]>(`/api/meals/weekly${query}`);
+        return this.request<WeeklyMealsResponse>(`/api/meals/weekly${query}`);
     }
 
     async getMeal(id: string): Promise<MealWithDetails> {

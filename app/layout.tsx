@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { SessionProvider } from "@/components/providers/session-provider";
+import { ClerkProvider } from "@clerk/nextjs";
 import { DragDropProvider } from "@/components/providers/drag-drop-provider";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { Toaster } from "@/components/ui/sonner";
@@ -40,7 +40,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ErrorBoundary>
-          <SessionProvider>
+          <ClerkProvider>
             <QueryProvider>
               <DragDropProvider>
                 {children}
@@ -57,7 +57,7 @@ export default function RootLayout({
                 }}
               />
             </QueryProvider>
-          </SessionProvider>
+          </ClerkProvider>
         </ErrorBoundary>
       </body>
     </html>

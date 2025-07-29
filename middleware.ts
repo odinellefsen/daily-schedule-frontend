@@ -1,75 +1,24 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // Define public routes that don't require authentication
-const publicRoutes = [
-    "/login",
-    "/signup",
-    "/api/auth", // NextAuth API routes
-];
+const isPublicRoute = createRouteMatcher([
+    "/sign-in(.*)",
+    "/sign-up(.*)",
+    "/api/webhooks(.*)",
+]);
 
-// Define routes that should redirect to login if not authenticated
-const protectedRoutes = ["/", "/config", "/profile", "/settings"];
-
-export async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-
-    // Allow public routes
-    if (publicRoutes.some((route) => pathname.startsWith(route))) {
-        return NextResponse.next();
+export default clerkMiddleware(async (auth, req) => {
+    // Protect all routes except public ones
+    if (!isPublicRoute(req)) {
+        await auth.protect();
     }
-
-    // Allow static files and API routes (except auth)
-    if (
-        pathname.startsWith("/_next") ||
-        pathname.startsWith("/favicon.ico") ||
-        pathname.startsWith("/api") ||
-        pathname.includes(".")
-    ) {
-        return NextResponse.next();
-    }
-
-    // Check authentication for protected routes
-    if (
-        protectedRoutes.some(
-            (route) => pathname === route || pathname.startsWith(route + "/")
-        )
-    ) {
-        try {
-            const session = await auth();
-
-            if (!session || !session.user) {
-                // Redirect to login with callback URL
-                const loginUrl = new URL("/login", request.url);
-                loginUrl.searchParams.set("callbackUrl", pathname);
-                return NextResponse.redirect(loginUrl);
-            }
-
-            // User is authenticated, continue
-            return NextResponse.next();
-        } catch (error) {
-            console.error("Middleware auth error:", error);
-            // Redirect to login on auth error
-            const loginUrl = new URL("/login", request.url);
-            loginUrl.searchParams.set("callbackUrl", pathname);
-            return NextResponse.redirect(loginUrl);
-        }
-    }
-
-    // For all other routes, continue
-    return NextResponse.next();
-}
+});
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
-        "/((?!api|_next/static|_next/image|favicon.ico).*)",
+        // Skip Next.js internals and all static files, unless found in search params
+        "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+        // Always run for API routes
+        "/(api|trpc)(.*)",
     ],
 };

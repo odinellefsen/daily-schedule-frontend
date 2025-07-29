@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useUser, useClerk } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -17,13 +17,14 @@ import { User, LogOut, Settings, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export function UserMenu() {
-  const { data: session, status } = useSession()
+  const { user, isLoaded } = useUser()
+  const { signOut } = useClerk()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSignOut = async () => {
     setIsLoading(true)
     try {
-      await signOut({ callbackUrl: '/auth/login' })
+      await signOut({ redirectUrl: '/sign-in' })
     } catch (error) {
       console.error('Sign out error:', error)
     } finally {
@@ -31,19 +32,19 @@ export function UserMenu() {
     }
   }
 
-  if (status === 'loading') {
+  if (!isLoaded) {
     return <Skeleton className="h-8 w-8 rounded-full" />
   }
 
-  if (status === 'unauthenticated') {
+  if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/auth/login">
+        <Link href="/sign-in">
           <Button variant="ghost" size="sm">
             Sign In
           </Button>
         </Link>
-        <Link href="/auth/signup">
+        <Link href="/sign-up">
           <Button size="sm">
             Sign Up
           </Button>
@@ -52,17 +53,16 @@ export function UserMenu() {
     )
   }
 
-  const user = session?.user
-  const initials = user?.name
-    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase()
-    : user?.email?.[0]?.toUpperCase() || 'U'
+  const initials = user.fullName
+    ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()
+    : user.emailAddresses[0]?.emailAddress?.[0]?.toUpperCase() || 'U'
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user?.image || undefined} alt={user?.name || 'User'} />
+            <AvatarImage src={user.imageUrl} alt={user.fullName || 'User'} />
             <AvatarFallback className="text-xs font-medium">
               {initials}
             </AvatarFallback>
@@ -73,10 +73,10 @@ export function UserMenu() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {user?.name || 'User'}
+              {user.fullName || 'User'}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
+              {user.emailAddresses[0]?.emailAddress}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -97,7 +97,7 @@ export function UserMenu() {
         </DropdownMenuItem>
         
         {/* Show admin menu if user has admin role (optional) */}
-        {user?.email === 'admin@example.com' && (
+        {user.emailAddresses[0]?.emailAddress === 'admin@example.com' && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
