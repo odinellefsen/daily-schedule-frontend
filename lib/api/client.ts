@@ -24,6 +24,7 @@ import {
     ApiResponse,
     RecipeWithDetails,
     FoodItemWithUnits,
+    UnitOfMeasurementEnum,
 } from "@/lib/types/api";
 
 // Mock mode for development
@@ -301,7 +302,7 @@ class ApiClient {
                     {
                         id: "unit-1",
                         foodItemId: foodItemId,
-                        unitOfMeasurement: "gram",
+                        unitOfMeasurement: UnitOfMeasurementEnum.GRAM,
                         unitDescription: "per 100g serving",
                         calories: 165,
                         proteinInGrams: 31,
@@ -313,7 +314,7 @@ class ApiClient {
                     {
                         id: "unit-2",
                         foodItemId: foodItemId,
-                        unitOfMeasurement: "piece",
+                        unitOfMeasurement: UnitOfMeasurementEnum.PIECE,
                         unitDescription: "medium breast (150g)",
                         calories: 248,
                         proteinInGrams: 46.5,
