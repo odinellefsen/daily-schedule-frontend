@@ -182,7 +182,6 @@ class ApiClient {
                         recipes: [
                             {
                                 recipeName: "Demo: Grilled Chicken",
-                                scalingFactor: 1,
                             },
                         ],
                         steps: [

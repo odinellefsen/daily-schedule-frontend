@@ -230,9 +230,7 @@ export function MealDetailModal({ open, onOpenChange, meal }: MealDetailModalPro
                 {meal.recipes.map((recipe, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
                     <span className="font-medium">{recipe.recipeName}</span>
-                    {recipe.scalingFactor !== 1 && (
-                      <Badge variant="outline">×{recipe.scalingFactor}</Badge>
-                    )}
+                    
                   </div>
                 ))}
               </div>

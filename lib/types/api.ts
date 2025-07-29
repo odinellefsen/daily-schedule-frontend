@@ -171,7 +171,6 @@ export interface MealRecipeSnapshot {
     recipeName: string;
     recipeDescription?: string;
     recipeVersion: number;
-    scalingFactor: number;
 }
 
 export interface Meal {
@@ -232,7 +231,6 @@ export interface CreateMealRequest {
     scheduledToBeEatenAt?: string;
     recipes: {
         recipeId: string;
-        scalingFactor: number;
     }[];
 }
 

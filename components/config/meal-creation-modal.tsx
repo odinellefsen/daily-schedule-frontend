@@ -47,7 +47,6 @@ const mealCreationSchema = z.object({
   recipes: z.array(z.object({
     recipeId: z.string(),
     recipeName: z.string(),
-    scalingFactor: z.number().min(0.1).max(10),
   })).min(1, 'Select at least one recipe'),
 })
 
@@ -128,7 +127,6 @@ export function MealCreationModal({ open, onOpenChange, defaultDate }: MealCreat
         scheduledToBeEatenAt: data.scheduledToBeEatenAt?.toISOString(),
         recipes: data.recipes.map(r => ({
           recipeId: r.recipeId,
-          scalingFactor: r.scalingFactor,
         })),
       })
 
@@ -157,7 +155,6 @@ export function MealCreationModal({ open, onOpenChange, defaultDate }: MealCreat
     addRecipe({
       recipeId: recipe.id,
       recipeName: recipe.nameOfTheRecipe,
-      scalingFactor: 1,
     })
   }
 
@@ -306,19 +303,6 @@ export function MealCreationModal({ open, onOpenChange, defaultDate }: MealCreat
                             </div>
                             <div className="flex items-center gap-3">
                               <div className="flex items-center gap-2">
-                                <Label className="text-xs">Scaling:</Label>
-                                <Input
-                                  type="number"
-                                  step="0.1"
-                                  min="0.1"
-                                  max="10"
-                                  value={selectedRecipe.scalingFactor}
-                                  onChange={(e) => {
-                                    const value = parseFloat(e.target.value) || 1
-                                    form.setValue(`recipes.${index}.scalingFactor`, value)
-                                  }}
-                                  className="w-20 text-center"
-                                />
                                 <span className="text-xs text-muted-foreground">×</span>
                               </div>
                               <Button
@@ -440,11 +424,6 @@ export function MealCreationModal({ open, onOpenChange, defaultDate }: MealCreat
                         <div key={recipe.recipeId} className="flex items-center justify-between p-3 border rounded-lg">
                           <div>
                             <span className="font-medium">{recipe.recipeName}</span>
-                            {recipe.scalingFactor !== 1 && (
-                              <span className="text-sm text-muted-foreground ml-2">
-                                (×{recipe.scalingFactor})
-                              </span>
-                            )}
                           </div>
                         </div>
                       ))}
