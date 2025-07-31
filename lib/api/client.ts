@@ -289,11 +289,11 @@ class ApiClient {
 
         // Food item with units requests
         if (
-            endpoint.includes("/api/food-items/") &&
+            endpoint.includes("/api/food-item/") &&
             endpoint.endsWith("/units") &&
             method === "GET"
         ) {
-            const foodItemId = endpoint.split("/")[3]; // Extract ID from /api/food-items/{id}/units
+            const foodItemId = endpoint.split("/")[3]; // Extract ID from /api/food-item/{id}/units
             return {
                 id: foodItemId,
                 name: "Demo: Chicken Breast",
@@ -421,26 +421,26 @@ class ApiClient {
 
     // Food API methods
     async getFoodItems(): Promise<FoodItem[]> {
-        return this.request<FoodItem[]>("/api/food-items");
+        return this.request<FoodItem[]>("/api/food-item");
     }
 
     async getFoodItem(id: string): Promise<FoodItem> {
-        return this.request<FoodItem>(`/api/food-items/${id}`);
+        return this.request<FoodItem>(`/api/food-item/${id}`);
     }
 
     async getFoodItemWithUnits(id: string): Promise<FoodItemWithUnits> {
-        return this.request<FoodItemWithUnits>(`/api/food-items/${id}/units`);
+        return this.request<FoodItemWithUnits>(`/api/food-item/${id}/units`);
     }
 
     async createFoodItem(data: CreateFoodItemRequest): Promise<FoodItem> {
-        return this.request<FoodItem>("/api/food-items", {
+        return this.request<FoodItem>("/api/food-item", {
             method: "POST",
             body: JSON.stringify(data),
         });
     }
 
     async createFoodItemUnit(data: CreateFoodItemUnitRequest): Promise<void> {
-        await this.request<void>("/api/food-items/units", {
+        await this.request<void>("/api/food-item/units", {
             method: "POST",
             body: JSON.stringify(data),
         });
