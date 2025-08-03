@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils'
 import { apiClient } from '@/lib/api/client'
 import { useConfigStore } from '@/lib/stores/config-store'
 import { UnitOfMeasurementEnum } from '@/lib/types/api'
+import { useClerkApi } from '@/lib/hooks/use-clerk-api'
 
 // Form validation schemas
 const foodItemBasicSchema = z.object({
@@ -73,6 +74,9 @@ export function FoodItemCreationModal({ open, onOpenChange }: FoodItemCreationMo
   const [createdFoodItem, setCreatedFoodItem] = useState<{ id: string; name: string } | null>(null)
   
   const { fetchFoodItems } = useConfigStore()
+  
+  // Initialize Clerk authentication for API calls
+  const { isAuthenticated, isLoaded } = useClerkApi()
 
   // Form states for each step
   const [basicData, setBasicData] = useState<FoodItemBasicForm | null>(null)
@@ -119,6 +123,11 @@ export function FoodItemCreationModal({ open, onOpenChange }: FoodItemCreationMo
   }
 
   const handleSubmit = async () => {
+    if (!isLoaded || !isAuthenticated) {
+      setError('You must be signed in to create food items.')
+      return
+    }
+
     if (!basicData || unitsData.length === 0) {
       setError('Missing form data. Please complete all steps.')
       return

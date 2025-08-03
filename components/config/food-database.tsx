@@ -16,6 +16,7 @@ import {
 import { useConfigStore } from '@/lib/stores/config-store'
 import { FoodItem } from '@/lib/types/api'
 import { FoodItemCreationModal } from './food-item-creation-modal'
+import { useClerkApi } from '@/lib/hooks/use-clerk-api'
 
 interface FoodItemCardProps {
   foodItem: FoodItem
@@ -62,9 +63,15 @@ export function FoodDatabase() {
     clearFoodItemsError 
   } = useConfigStore()
 
+  // Initialize Clerk authentication for API calls
+  const { isAuthenticated, isLoaded } = useClerkApi()
+
   useEffect(() => {
+    // Only fetch food items when Clerk auth is loaded and user is authenticated
+    if (!isLoaded || !isAuthenticated) return
+    
     fetchFoodItems()
-  }, [fetchFoodItems])
+  }, [fetchFoodItems, isLoaded, isAuthenticated])
 
   const handleRefresh = () => {
     clearFoodItemsError()

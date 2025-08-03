@@ -48,6 +48,7 @@ export function isApiError(error: unknown): error is ApiError {
 
 class ApiClient {
     private baseURL: string;
+    private tokenRefreshCallback: (() => Promise<void>) | null = null;
 
     constructor() {
         this.baseURL =
@@ -59,13 +60,19 @@ class ApiClient {
         clientToken = token;
     }
 
+    // Method to set token refresh callback
+    setTokenRefreshCallback(callback: (() => Promise<void>) | null): void {
+        this.tokenRefreshCallback = callback;
+    }
+
     private async getAuthToken(): Promise<string | null> {
         return clientToken;
     }
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: RequestInit = {},
+        isRetry: boolean = false
     ): Promise<T> {
         // Mock responses for development
         if (MOCK_API_MODE) {
@@ -84,6 +91,25 @@ class ApiClient {
         });
 
         if (!response.ok) {
+            // Handle 401 Unauthorized - try to refresh token and retry once
+            if (
+                response.status === 401 &&
+                !isRetry &&
+                this.tokenRefreshCallback
+            ) {
+                try {
+                    console.log(
+                        "Token expired, refreshing and retrying request..."
+                    );
+                    await this.tokenRefreshCallback();
+                    // Retry the request with the new token
+                    return this.request<T>(endpoint, options, true);
+                } catch (refreshError) {
+                    console.error("Failed to refresh token:", refreshError);
+                    // Fall through to original error handling
+                }
+            }
+
             const errorData = await response.json().catch(() => ({}));
             throw new ApiError(
                 errorData.message || "Request failed",
