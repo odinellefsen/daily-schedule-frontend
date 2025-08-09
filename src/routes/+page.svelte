@@ -16,6 +16,8 @@
 
   const urgencyColor = (u: 'overdue' | 'now' | 'upcoming' | 'later') =>
     ({ overdue: '#ef4444', now: '#10b981', upcoming: '#f59e0b', later: '#9ca3af' }[u]);
+
+  let show = false;
 </script>
 
 <main class="wrap">
@@ -25,11 +27,20 @@
   </header>
 
   {#if data.isAuthed}
-    <form method="POST" class="new">
-      <input name="description" placeholder="What to do?" aria-label="Description" required />
-      <input name="scheduledFor" type="datetime-local" aria-label="When" />
-      <button class="add" formaction="?/create" aria-label="Add">+</button>
-    </form>
+    <button class="fab" on:click={() => (show = true)} aria-label="Add todo">+</button>
+    {#if show}
+      <div class="overlay" role="dialog" aria-modal="true" aria-label="Add todo">
+        <form method="POST" action="?/create" class="dialog" on:submit={() => (show = false)}>
+          <h2>Add todo</h2>
+          <input name="description" placeholder="What to do?" aria-label="Description" required />
+          <input name="scheduledFor" type="datetime-local" aria-label="When" />
+          <div class="row">
+            <button type="button" class="btn ghost" on:click={() => (show = false)}>Cancel</button>
+            <button class="btn primary" type="submit">Add</button>
+          </div>
+        </form>
+      </div>
+    {/if}
   {/if}
 
   {#if data.isAuthed === false}
@@ -71,9 +82,15 @@
   .topbar { display: flex; align-items: baseline; justify-content: space-between; }
   h1 { font-size: 1.25rem; margin: 0; }
   .counts { font-size: 0.875rem; color: #6b7280; }
-  .new { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-top: 12px; }
-  .new input { font-size: 1rem; padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
-  .add { width: 44px; height: 44px; border-radius: 10px; border: 0; background: #111827; color: #fff; font-size: 1.25rem; }
+  .fab { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 999px; border: 0; background: #111827; color: #fff; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: grid; place-items: end; padding: 0 0 12px 0; }
+  .dialog { width: 100%; max-width: 28rem; margin: 0 auto; background: #fff; color: #111827; padding: 16px; border-radius: 16px 16px 0 0; display: grid; gap: 10px; }
+  .dialog h2 { margin: 0 0 4px 0; font-size: 1.1rem; }
+  .dialog input { font-size: 1rem; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
+  .row { display: flex; justify-content: flex-end; gap: 8px; }
+  .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
+  .btn.primary { background: #111827; border-color: #111827; color: #fff; }
+  .btn.ghost { background: #fff; }
   .empty { margin-top: 24px; color: #6b7280; font-size: 0.95rem; }
 
   .list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
