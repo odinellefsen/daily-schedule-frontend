@@ -16,7 +16,7 @@
     {#if data?.isAuthed === false}
       <a href="/sign-in" class="lnk">Sign in</a>
     {:else}
-      <span class="spacer" />
+      <span class="spacer"></span>
     {/if}
 
     <!-- Client components (enhance when CSR is enabled) -->

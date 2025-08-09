@@ -122,17 +122,32 @@ export const actions: Actions = {
             return fail(400, { message: "Description is required." });
         }
 
-        const res = await fetch(`${apiBase}/api/todo/`, {
+        const payload = {
+            description,
+            scheduledFor,
+            userId: locals.session.userId,
+        };
+
+        console.log("Making API call to:", `${apiBase}/api/todo`);
+        console.log("Payload:", payload);
+
+        const res = await fetch(`${apiBase}/api/todo`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${locals.authToken}`,
             },
-            body: JSON.stringify({ description, scheduledFor }),
+            body: JSON.stringify(payload),
         });
 
+        console.log("API response status:", res.status);
+
         if (!res.ok) {
-            return fail(res.status, { message: "Failed to create todo." });
+            const errorBody = await res.text();
+            console.log("API error response:", errorBody);
+            return fail(res.status, {
+                message: `Failed to create todo: ${res.status}`,
+            });
         }
 
         throw redirect(303, "/");
