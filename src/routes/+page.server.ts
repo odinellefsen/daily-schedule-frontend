@@ -97,15 +97,21 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 
 export const actions: Actions = {
     default: async ({ request, locals, fetch }) => {
+        console.log("Server action called!");
         const apiBase =
             (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
             "http://localhost:3005";
 
         if (!locals.session || !locals.authToken) {
+            console.log("Not authenticated:", {
+                session: !!locals.session,
+                authToken: !!locals.authToken,
+            });
             return fail(401, { message: "Please sign in to add todos." });
         }
 
         const form = await request.formData();
+        console.log("Form data:", Array.from(form.entries()));
         const description = String(form.get("description") || "").trim();
         const scheduledRaw = form.get("scheduledFor");
         const scheduledFor = scheduledRaw

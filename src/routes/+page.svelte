@@ -45,10 +45,16 @@
     <button class="fab" on:click={() => (show = true)} aria-label="Add todo">+</button>
     {#if show}
       <div class="overlay" role="dialog" aria-modal="true" aria-label="Add todo">
-        <form method="POST" class="dialog" use:enhance={() => {
+        <form method="POST" class="dialog" use:enhance={({ formElement }) => {
+          console.log('Form submitting...');
+          const formData = new FormData(formElement);
+          console.log('Client form data:', Array.from(formData.entries()));
           return async ({ result }) => {
+            console.log('Form result:', result);
             if (result.type === 'redirect') {
               show = false;
+            } else if (result.type === 'failure') {
+              console.error('Form failed:', result.data);
             }
           };
         }}>
