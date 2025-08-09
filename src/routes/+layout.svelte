@@ -4,19 +4,25 @@
     import SignedOut from 'clerk-sveltekit/client/SignedOut.svelte';
     import UserButton from 'clerk-sveltekit/client/UserButton.svelte';
 
-    let { children } = $props();
+    let { data, children } = $props();
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<header class="hdr">
+  <header class="hdr">
+    <!-- Server-rendered fallback (works when CSR is disabled) -->
+    {#if data?.isAuthed === false}
+      <a href="/sign-in" class="lnk">Sign in</a>
+    {/if}
+
+    <!-- Client components (enhance when CSR is enabled) -->
     <SignedIn>
-        <UserButton afterSignOutUrl="/" />
+      <UserButton afterSignOutUrl="/" />
     </SignedIn>
     <SignedOut>
-        <a href="/sign-in" class="lnk">Sign in</a>
+      <a href="/sign-in" class="lnk">Sign in</a>
     </SignedOut>
   </header>
 
