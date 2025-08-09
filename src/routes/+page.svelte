@@ -24,6 +24,14 @@
     <div class="counts">{data.counts.remaining} left</div>
   </header>
 
+  {#if data.isAuthed}
+    <form method="POST" class="new">
+      <input name="description" placeholder="What to do?" aria-label="Description" required />
+      <input name="scheduledFor" type="datetime-local" aria-label="When" />
+      <button class="add" formaction="?/create" aria-label="Add">+</button>
+    </form>
+  {/if}
+
   {#if data.isAuthed === false}
     <p class="empty">Sign in to see your tasks.</p>
   {:else if data.todos.length === 0}
@@ -63,6 +71,9 @@
   .topbar { display: flex; align-items: baseline; justify-content: space-between; }
   h1 { font-size: 1.25rem; margin: 0; }
   .counts { font-size: 0.875rem; color: #6b7280; }
+  .new { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-top: 12px; }
+  .new input { font-size: 1rem; padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
+  .add { width: 44px; height: 44px; border-radius: 10px; border: 0; background: #111827; color: #fff; font-size: 1.25rem; }
   .empty { margin-top: 24px; color: #6b7280; font-size: 0.95rem; }
 
   .list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }

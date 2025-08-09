@@ -1,4 +1,5 @@
-import type { PageServerLoad } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
+import { redirect, fail } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
 
 type Todo = {
@@ -103,4 +104,42 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
             isAuthed,
         } satisfies TodayResponse & { isAuthed: boolean };
     }
+};
+
+export const actions: Actions = {
+    create: async ({ request, locals, fetch }) => {
+        const apiBase =
+            (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
+            "http://localhost:3005";
+
+        if (!locals.session || !locals.authToken) {
+            return fail(401, { message: "Please sign in to add todos." });
+        }
+
+        const form = await request.formData();
+        const description = String(form.get("description") || "").trim();
+        const scheduledRaw = form.get("scheduledFor");
+        const scheduledFor = scheduledRaw
+            ? new Date(String(scheduledRaw)).toISOString()
+            : undefined;
+
+        if (!description) {
+            return fail(400, { message: "Description is required." });
+        }
+
+        const res = await fetch(`${apiBase}/api/todo/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${locals.authToken}`,
+            },
+            body: JSON.stringify({ description, scheduledFor }),
+        });
+
+        if (!res.ok) {
+            return fail(res.status, { message: "Failed to create todo." });
+        }
+
+        throw redirect(303, "/");
+    },
 };
