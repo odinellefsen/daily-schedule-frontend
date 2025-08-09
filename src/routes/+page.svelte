@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import { goto, invalidateAll } from '$app/navigation';
   
   export let data: {
     todos: Array<{
@@ -46,14 +47,21 @@
     {#if show}
       <div class="overlay" role="dialog" aria-modal="true" aria-label="Add todo">
         <form method="POST" class="dialog" use:enhance={({ formElement }) => {
-          console.log('Form submitting...');
           const formData = new FormData(formElement);
-          console.log('Client form data:', Array.from(formData.entries()));
           return async ({ result }) => {
-            console.log('Form result:', result);
             if (result.type === 'redirect') {
+              // Force data reload even when navigating to the same URL
+              await invalidateAll();
               show = false;
-            } else if (result.type === 'failure') {
+              await goto(result.location, { invalidateAll: true });
+              return;
+            }
+            if (result.type === 'success') {
+              await invalidateAll();
+              show = false;
+              return;
+            }
+            if (result.type === 'failure') {
               console.error('Form failed:', result.data);
             }
           };
