@@ -30,7 +30,7 @@
     <button class="fab" on:click={() => (show = true)} aria-label="Add todo">+</button>
     {#if show}
       <div class="overlay" role="dialog" aria-modal="true" aria-label="Add todo">
-        <form method="POST" action="?/create" class="dialog" on:submit={() => (show = false)}>
+        <form method="POST" action="?/create" class="dialog">
           <h2>Add todo</h2>
           <input name="description" placeholder="What to do?" aria-label="Description" required />
           <input name="scheduledFor" type="datetime-local" aria-label="When" />
@@ -78,15 +78,16 @@
     padding: 12px 12px 24px;
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     background: var(--bg, #fff);
+    overflow-x: hidden;
   }
   .topbar { display: flex; align-items: baseline; justify-content: space-between; }
   h1 { font-size: 1.25rem; margin: 0; }
   .counts { font-size: 0.875rem; color: #6b7280; }
   .fab { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 999px; border: 0; background: #111827; color: #fff; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: grid; place-items: end; padding: 0 0 12px 0; }
-  .dialog { width: 100%; max-width: 28rem; margin: 0 auto; background: #fff; color: #111827; padding: 16px; border-radius: 16px 16px 0 0; display: grid; gap: 10px; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: flex-end; justify-content: center; padding: 0; overflow: hidden; }
+  .dialog { width: 100%; max-width: 100%; margin: 0; background: #fff; color: #111827; padding: 16px; border-radius: 16px 16px 0 0; display: grid; gap: 10px; box-sizing: border-box; overflow-x: hidden; }
   .dialog h2 { margin: 0 0 4px 0; font-size: 1.1rem; }
-  .dialog input { font-size: 1rem; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
+  .dialog input { font-size: 1rem; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; width: 100%; box-sizing: border-box; }
   .row { display: flex; justify-content: flex-end; gap: 8px; }
   .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
   .btn.primary { background: #111827; border-color: #111827; color: #fff; }
