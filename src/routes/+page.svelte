@@ -18,6 +18,19 @@
     ({ overdue: '#ef4444', now: '#10b981', upcoming: '#f59e0b', later: '#9ca3af' }[u]);
 
   let show = false;
+  let nowLocal = '';
+
+  const pad = (n: number) => (n < 10 ? `0${n}` : String(n));
+  function nowLocalDatetime() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const h = pad(d.getHours());
+    const min = pad(d.getMinutes());
+    return `${y}-${m}-${day}T${h}:${min}`;
+  }
+  $: if (show) nowLocal = nowLocalDatetime();
 </script>
 
 <main class="wrap">
@@ -33,10 +46,10 @@
         <form method="POST" action="?/create" class="dialog">
           <h2>Add todo</h2>
           <input name="description" placeholder="What to do?" aria-label="Description" required />
-          <input name="scheduledFor" type="datetime-local" aria-label="When" />
+          <input name="scheduledFor" type="datetime-local" aria-label="When" value={nowLocal} />
           <div class="row">
             <button type="button" class="btn ghost" on:click={() => (show = false)}>Cancel</button>
-            <button class="btn primary" type="submit">Add</button>
+            <button class="btn primary" type="submit" formaction="?/create">Add</button>
           </div>
         </form>
       </div>
