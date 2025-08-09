@@ -37,31 +37,52 @@ const urgencyOrder: Record<Todo["urgency"], number> = {
 export const load: PageServerLoad = async ({ fetch, locals }) => {
     const apiBase =
         (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
-        "http://localhost:3000";
+        "http://localhost:3005";
 
-    const res = await fetch(`${apiBase}/api/todo/today`, {
-        headers: locals.authToken
-            ? {
-                  Authorization: `Bearer ${locals.authToken}`,
-                  "Content-Type": "application/json",
-              }
-            : { "Content-Type": "application/json" },
-    });
+    const isAuthed = Boolean(locals.authToken);
 
-    if (!res.ok) {
+    // If not authenticated yet, don't ping the API; return empty state
+    if (!isAuthed) {
         return {
             todos: [] as Todo[],
             counts: { total: 0, completed: 0, remaining: 0, overdue: 0 },
-        } satisfies TodayResponse;
+            isAuthed,
+        } satisfies TodayResponse & { isAuthed: boolean };
     }
 
-    const data = (await res.json()) as TodayResponse;
-    const sorted = [...data.todos].sort(
-        (a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
-    );
+    try {
+        const res = await fetch(`${apiBase}/api/todo/today`, {
+            headers: locals.authToken
+                ? {
+                      Authorization: `Bearer ${locals.authToken}`,
+                      "Content-Type": "application/json",
+                  }
+                : { "Content-Type": "application/json" },
+        });
 
-    return {
-        todos: sorted,
-        counts: data.counts,
-    } satisfies TodayResponse;
+        if (!res.ok) {
+            return {
+                todos: [] as Todo[],
+                counts: { total: 0, completed: 0, remaining: 0, overdue: 0 },
+                isAuthed,
+            } satisfies TodayResponse & { isAuthed: boolean };
+        }
+
+        const data = (await res.json()) as TodayResponse;
+        const sorted = [...data.todos].sort(
+            (a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
+        );
+
+        return {
+            todos: sorted,
+            counts: data.counts,
+            isAuthed,
+        } satisfies TodayResponse & { isAuthed: boolean };
+    } catch {
+        return {
+            todos: [] as Todo[],
+            counts: { total: 0, completed: 0, remaining: 0, overdue: 0 },
+            isAuthed,
+        } satisfies TodayResponse & { isAuthed: boolean };
+    }
 };

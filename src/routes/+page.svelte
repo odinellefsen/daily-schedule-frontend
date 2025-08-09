@@ -11,6 +11,7 @@
       isOverdue: boolean;
     }>;
     counts: { total: number; completed: number; remaining: number; overdue: number };
+    isAuthed?: boolean;
   };
 
   const urgencyColor = (u: 'overdue' | 'now' | 'upcoming' | 'later') =>
@@ -23,7 +24,9 @@
     <div class="counts">{data.counts.remaining} left</div>
   </header>
 
-  {#if data.todos.length === 0}
+  {#if data.isAuthed === false}
+    <p class="empty">Sign in to see your tasks.</p>
+  {:else if data.todos.length === 0}
     <p class="empty">You're all set for today.</p>
   {:else}
     <ul class="list">
