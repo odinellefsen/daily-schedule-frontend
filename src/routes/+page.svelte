@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { enhance } from '$app/forms';
+  
   export let data: {
     todos: Array<{
       id: string;
@@ -43,13 +45,19 @@
     <button class="fab" on:click={() => (show = true)} aria-label="Add todo">+</button>
     {#if show}
       <div class="overlay" role="dialog" aria-modal="true" aria-label="Add todo">
-        <form method="POST" action="?/create" class="dialog">
+        <form method="POST" class="dialog" use:enhance={() => {
+          return async ({ result }) => {
+            if (result.type === 'redirect') {
+              show = false;
+            }
+          };
+        }}>
           <h2>Add todo</h2>
           <input name="description" placeholder="What to do?" aria-label="Description" required />
           <input name="scheduledFor" type="datetime-local" aria-label="When" value={nowLocal} />
           <div class="row">
             <button type="button" class="btn ghost" on:click={() => (show = false)}>Cancel</button>
-            <button class="btn primary" type="submit" formaction="?/create">Add</button>
+            <button class="btn primary" type="submit">Add</button>
           </div>
         </form>
       </div>

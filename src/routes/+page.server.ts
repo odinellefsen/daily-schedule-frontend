@@ -96,7 +96,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 };
 
 export const actions: Actions = {
-    create: async ({ request, locals, fetch }) => {
+    default: async ({ request, locals, fetch }) => {
         const apiBase =
             (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
             "http://localhost:3005";
