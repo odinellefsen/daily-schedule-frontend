@@ -61,7 +61,13 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
                 : { "Content-Type": "application/json" },
         });
 
-        if (!res.ok) {
+        const api = (await res.json().catch(() => null)) as {
+            success: boolean;
+            message?: string;
+            data?: TodayResponse;
+        } | null;
+
+        if (!res.ok || !api || api.success === false || !api.data) {
             return {
                 todos: [],
                 counts: { total: 1, completed: 0, remaining: 1, overdue: 0 },
@@ -69,7 +75,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
             } satisfies TodayResponse & { isAuthed: boolean };
         }
 
-        const data = (await res.json()) as TodayResponse;
+        const data = api.data as TodayResponse;
         if (!data.todos || data.todos.length === 0) {
             return {
                 todos: [] as Todo[],
@@ -77,6 +83,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
                 isAuthed,
             } satisfies TodayResponse & { isAuthed: boolean };
         }
+
         const sorted = [...data.todos].sort(
             (a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
         );
