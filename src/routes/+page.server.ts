@@ -51,17 +51,6 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
         } satisfies TodayResponse & { isAuthed: boolean };
     }
 
-    const demoTodo: Todo = {
-        id: "demo-1",
-        description: "Test todo",
-        scheduledFor: new Date().toISOString(),
-        completed: false,
-        context: { type: "standalone" },
-        urgency: "now",
-        canStartNow: true,
-        isOverdue: false,
-    };
-
     try {
         const res = await fetch(`${apiBase}/api/todo/today`, {
             headers: locals.authToken
@@ -74,7 +63,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 
         if (!res.ok) {
             return {
-                todos: [demoTodo],
+                todos: [],
                 counts: { total: 1, completed: 0, remaining: 1, overdue: 0 },
                 isAuthed,
             } satisfies TodayResponse & { isAuthed: boolean };
@@ -83,7 +72,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
         const data = (await res.json()) as TodayResponse;
         if (!data.todos || data.todos.length === 0) {
             return {
-                todos: [demoTodo] as Todo[],
+                todos: [] as Todo[],
                 counts: { total: 1, completed: 0, remaining: 1, overdue: 0 },
                 isAuthed,
             } satisfies TodayResponse & { isAuthed: boolean };
@@ -99,7 +88,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
         } satisfies TodayResponse & { isAuthed: boolean };
     } catch {
         return {
-            todos: [demoTodo] as Todo[],
+            todos: [] as Todo[],
             counts: { total: 1, completed: 0, remaining: 1, overdue: 0 },
             isAuthed,
         } satisfies TodayResponse & { isAuthed: boolean };
