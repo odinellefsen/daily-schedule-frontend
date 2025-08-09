@@ -39,7 +39,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
         (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
         "http://localhost:3005";
 
-    const isAuthed = Boolean(locals.authToken);
+    const isAuthed = Boolean(locals.session);
 
     // If not authenticated yet, don't ping the API; return empty state
     if (!isAuthed) {
