@@ -15,6 +15,8 @@
     <!-- Server-rendered fallback (works when CSR is disabled) -->
     {#if data?.isAuthed === false}
       <a href="/sign-in" class="lnk">Sign in</a>
+    {:else}
+      <span class="spacer" />
     {/if}
 
     <!-- Client components (enhance when CSR is enabled) -->
@@ -29,6 +31,7 @@
   {@render children?.()}
 
   <style>
-    .hdr { display:flex; justify-content:flex-end; padding: 8px 12px; }
+    .hdr { display:flex; justify-content:flex-end; align-items:center; gap: 8px; padding: 8px 12px; }
     .lnk { color: inherit; text-decoration: none; font-size: 0.95rem; }
+    .spacer { display:inline-block; width: 1px; height: 1px; }
   </style>

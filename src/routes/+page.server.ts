@@ -60,6 +60,8 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
                 : { "Content-Type": "application/json" },
         });
 
+        console.log(res);
+
         if (!res.ok) {
             return {
                 todos: [] as Todo[],
@@ -69,6 +71,28 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
         }
 
         const data = (await res.json()) as TodayResponse;
+        if (data.counts.total === 0) {
+            return {
+                todos: [
+                    {
+                        id: "1",
+                        description: "Test todo",
+                        scheduledFor: new Date(
+                            Date.now() + 1000 * 60 * 60 * 24
+                        ).toISOString(),
+                        completed: false,
+                        context: {
+                            type: "standalone",
+                        },
+                        urgency: "now",
+                        canStartNow: true,
+                        isOverdue: false,
+                    },
+                ] as Todo[],
+                counts: { total: 1, completed: 0, remaining: 0, overdue: 0 },
+                isAuthed,
+            } satisfies TodayResponse & { isAuthed: boolean };
+        }
         const sorted = [...data.todos].sort(
             (a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]
         );

@@ -4,7 +4,7 @@ import { handleClerk } from "clerk-sveltekit/server";
 import { env } from "$env/dynamic/private";
 
 const clerkHandle = handleClerk(env.CLERK_SECRET_KEY ?? "", {
-    debug: false,
+    debug: true,
     protectedPaths: [],
     signInUrl: "/sign-in",
 }) as Handle;
