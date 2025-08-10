@@ -61,6 +61,8 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
                 : { "Content-Type": "application/json" },
         });
 
+        console.log("API response:", await res.json());
+
         const api = (await res.json().catch(() => null)) as {
             success: boolean;
             message?: string;
@@ -119,6 +121,41 @@ export const actions: Actions = {
 
         const form = await request.formData();
         console.log("Form data:", Array.from(form.entries()));
+
+        const intent = String(form.get("intent") || "").trim();
+
+        // Handle cancel intent
+        if (intent === "cancel") {
+            const id = String(form.get("id") || "").trim();
+            if (!id) {
+                return fail(400, { message: "Missing todo id." });
+            }
+
+            console.log("Cancelling todo:", id);
+            const res = await fetch(`${apiBase}/api/todo/cancel`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${locals.authToken}`,
+                },
+                body: JSON.stringify({
+                    id,
+                    reasonForCancelling: "Cancelled by user",
+                }),
+            });
+
+            console.log("Cancel response status:", res.status);
+            if (!res.ok) {
+                const errorBody = await res.text().catch(() => "");
+                console.log("Cancel error response:", errorBody);
+                return fail(res.status, {
+                    message: `Failed to cancel todo: ${res.status}`,
+                });
+            }
+
+            throw redirect(303, "/");
+        }
+
         const description = String(form.get("description") || "").trim();
         const scheduledRaw = form.get("scheduledFor");
         const scheduledFor = scheduledRaw

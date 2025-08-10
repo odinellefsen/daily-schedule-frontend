@@ -96,9 +96,13 @@
               <time>{new Date(t.scheduledFor).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>
             </div>
           </div>
-          <button class="cta" disabled={!t.canStartNow} aria-label="Complete">
-            ✓
-          </button>
+          <div style="display:flex; gap:6px;">
+            <form method="POST">
+              <input type="hidden" name="intent" value="cancel" />
+              <input type="hidden" name="id" value={t.id} />
+              <button class="cta danger" type="submit" aria-label="Cancel">✕</button>
+            </form>
+          </div>
         </li>
       {/each}
     </ul>
@@ -154,6 +158,7 @@
   .badge { padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,0.06); }
   time { margin-left: auto; }
   .cta { border: 0; background: var(--accent, #10b981); color: #fff; width: 36px; height: 36px; border-radius: 10px; font-size: 1rem; }
+  .cta.danger { --accent: #ef4444; }
   .cta:disabled { filter: grayscale(1); opacity: 0.6; }
 
   @media (min-width: 480px) {
