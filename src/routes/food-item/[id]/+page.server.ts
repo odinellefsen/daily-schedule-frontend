@@ -21,7 +21,7 @@ type FoodItem = {
 };
 type ApiResponse<T> = { success: boolean; message?: string; data?: T };
 
-export const load: PageServerLoad = async ({ fetch, params, locals }) => {
+export const load: PageServerLoad = async ({ fetch, params, locals, url }) => {
     const apiBase =
         (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
         "http://localhost:3005";
@@ -60,7 +60,11 @@ export const load: PageServerLoad = async ({ fetch, params, locals }) => {
             .catch(() => null)) as ApiResponse<Unit[]> | null;
 
         const itemList = itemApi?.data ?? [];
-        const item = itemList.find((f) => f.id === id) ?? null;
+        let item = itemList.find((f) => f.id === id) ?? null;
+        if (!item) {
+            const hintedName = url.searchParams.get("name");
+            if (hintedName) item = { id, foodItemName: hintedName } as FoodItem;
+        }
         const units = unitsApi?.data ?? [];
 
         return { isAuthed, item, units };

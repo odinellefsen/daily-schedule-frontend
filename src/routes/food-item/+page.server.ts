@@ -23,7 +23,7 @@ function parseCategoryPath(
     return parts.length ? parts : undefined;
 }
 
-export const load: PageServerLoad = async ({ fetch, locals }) => {
+export const load: PageServerLoad = async ({ fetch, locals, url }) => {
     const apiBase =
         (env.DAILY_SCHEDULER_API_BASE as string | undefined) ??
         "http://localhost:3005";
@@ -56,21 +56,55 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
         }
 
         const items = api.data;
-        const topCategoriesSet = new Set<string>();
-        const baseItems: FoodItem[] = [];
-        for (const it of items) {
-            const hierarchy = it.categoryHierarchy ?? [];
-            if (hierarchy.length === 0) {
-                baseItems.push(it);
-            } else {
-                topCategoriesSet.add(hierarchy[0]);
+
+        const currentPath =
+            parseCategoryPath(url.searchParams.get("path")) ?? [];
+
+        // items that match current path prefix
+        const scoped = items.filter((it) => {
+            const h = it.categoryHierarchy ?? [];
+            if (currentPath.length === 0) return true;
+            if (h.length < currentPath.length) return false;
+            for (let i = 0; i < currentPath.length; i += 1) {
+                if ((h[i] || "") !== currentPath[i]) return false;
             }
+            return true;
+        });
+
+        const nextIndex = currentPath.length;
+        const nextCategoriesSet = new Set<string>();
+        for (const it of scoped) {
+            const h = it.categoryHierarchy ?? [];
+            if (h.length > nextIndex) nextCategoriesSet.add(h[nextIndex]);
         }
-        const topCategories = Array.from(topCategoriesSet).sort((a, b) =>
+        const nextCategories = Array.from(nextCategoriesSet).sort((a, b) =>
             a.localeCompare(b)
         );
 
-        return { isAuthed, items, topCategories, baseItems };
+        const levelItems = scoped.filter(
+            (it) => (it.categoryHierarchy ?? []).length === currentPath.length
+        );
+
+        const topCategories =
+            currentPath.length === 0
+                ? Array.from(
+                      new Set(
+                          items.flatMap((it) =>
+                              it.categoryHierarchy?.[0]
+                                  ? [it.categoryHierarchy[0]]
+                                  : []
+                          )
+                      )
+                  ).sort((a, b) => a.localeCompare(b))
+                : [];
+
+        return {
+            isAuthed,
+            currentPath,
+            nextCategories,
+            levelItems,
+            topCategories,
+        };
     } catch {
         return { isAuthed, items: [], topCategories: [], baseItems: [] };
     }
@@ -118,6 +152,7 @@ export const actions: Actions = {
             });
         }
 
-        throw redirect(303, `/food-item/${api.data.id}`);
+        const name = encodeURIComponent(api.data.foodItemName);
+        throw redirect(303, `/food-item/${api.data.id}?name=${name}`);
     },
 };

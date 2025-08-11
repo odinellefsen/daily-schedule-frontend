@@ -4,9 +4,10 @@
 
   export let data: {
     isAuthed: boolean;
-    items: Array<{ id: string; foodItemName: string; categoryHierarchy?: string[] | null; unitCount?: number; hasUnits?: boolean }>;
-    topCategories: string[];
-    baseItems: Array<{ id: string; foodItemName: string; categoryHierarchy?: string[] | null; unitCount?: number; hasUnits?: boolean }>;
+    currentPath?: string[];
+    nextCategories?: string[];
+    levelItems?: Array<{ id: string; foodItemName: string; categoryHierarchy?: string[] | null; unitCount?: number; hasUnits?: boolean }>;
+    topCategories?: string[];
   };
 
   let showCreate = false;
@@ -21,26 +22,52 @@
     {/if}
   </header>
 
-  {#if data.topCategories.length === 0 && data.baseItems.length === 0}
+  {#if (!data.topCategories || data.topCategories.length === 0) && (!data.levelItems || data.levelItems.length === 0)}
     <p class="empty">No items yet.</p>
   {/if}
 
-  {#if data.topCategories.length}
+  {#if (data.currentPath?.length ?? 0) > 0}
+  <section class="section">
+    <h2>Path</h2>
+    <div class="crumbs">
+      <a class="crumb" href="/food-item">root</a>
+      {#each (data.currentPath ?? []) as seg, i}
+        <span class="sep">›</span>
+        <a class="crumb" href={`/food-item?path=${encodeURIComponent((data.currentPath ?? []).slice(0,i+1).join(' > '))}`}>{seg}</a>
+      {/each}
+    </div>
+  </section>
+  {/if}
+
+  {#if (data.currentPath?.length ?? 0) === 0 && data.topCategories?.length}
   <section class="section">
     <h2>Categories</h2>
     <ul class="chips">
       {#each data.topCategories as c}
-        <li><span class="chip">{c}</span></li>
+        <li><a class="chip" href={`/food-item?path=${encodeURIComponent(c)}`}>{c}</a></li>
       {/each}
     </ul>
   </section>
   {/if}
 
-  {#if data.baseItems.length}
+  {#if data.nextCategories && data.nextCategories.length}
+  <section class="section">
+    <h2>Next</h2>
+    <ul class="chips">
+      {#each data.nextCategories as c}
+        <li>
+          <a class="chip" href={`/food-item?path=${encodeURIComponent([...(data.currentPath ?? []), c].join(' > '))}`}>{c}</a>
+        </li>
+      {/each}
+    </ul>
+  </section>
+  {/if}
+
+  {#if data.levelItems && data.levelItems.length}
   <section class="section">
     <h2>Items</h2>
     <ul class="list">
-      {#each data.baseItems as it}
+      {#each data.levelItems as it}
         <li>
           <a class="row" href={`/food-item/${it.id}`} aria-label={it.foodItemName}>
             <span class="title">{it.foodItemName}</span>
