@@ -22,6 +22,7 @@
 
   let show = false;
   let nowLocal = '';
+  let showFood = false;
 
   const pad = (n: number) => (n < 10 ? `0${n}` : String(n));
   function nowLocalDatetime() {
@@ -44,6 +45,7 @@
 
   {#if data.isAuthed}
     <button class="fab" on:click={() => (show = true)} aria-label="Add todo">+</button>
+    <button class="fab-secondary" on:click={() => (showFood = true)} aria-label="Open food menu">🍽</button>
     {#if show}
       <div class="overlay" role="dialog" aria-modal="true" aria-label="Add todo">
         <form method="POST" class="dialog" use:enhance={({ formElement }) => {
@@ -74,6 +76,15 @@
             <button class="btn primary" type="submit">Add</button>
           </div>
         </form>
+      </div>
+    {/if}
+    {#if showFood}
+      <div class="overlay" role="dialog" aria-modal="true" aria-label="Food menu" tabindex="0" on:keydown={(e) => e.key === 'Escape' && (showFood = false)}>
+        <div class="sheet" role="document" on:click|stopPropagation>
+          <h2>Explore</h2>
+          <a class="sheet-link" href="/food" aria-label="Food">Food →</a>
+          <button class="btn ghost block" type="button" on:click={() => (showFood = false)}>Close</button>
+        </div>
       </div>
     {/if}
   {/if}
@@ -123,6 +134,7 @@
   h1 { font-size: 1.25rem; margin: 0; }
   .counts { font-size: 0.875rem; color: #6b7280; }
   .fab { position: fixed; right: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 999px; border: 0; background: #111827; color: #fff; font-size: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+  .fab-secondary { position: fixed; left: 16px; bottom: 16px; width: 56px; height: 56px; border-radius: 999px; border: 0; background: #111827; color: #fff; font-size: 1.35rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: flex-end; justify-content: center; padding: 0; overflow: hidden; }
   .dialog { width: 100%; max-width: 100%; margin: 0; background: #fff; color: #111827; padding: 16px; border-radius: 16px 16px 0 0; display: grid; gap: 10px; box-sizing: border-box; overflow-x: hidden; }
   .dialog h2 { margin: 0 0 4px 0; font-size: 1.1rem; }
@@ -131,6 +143,10 @@
   .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
   .btn.primary { background: #111827; border-color: #111827; color: #fff; }
   .btn.ghost { background: #fff; }
+  .btn.block { width: 100%; }
+  .sheet { width: 100%; max-width: 100%; margin: 0; background: #fff; color: #111827; padding: 16px; border-radius: 16px 16px 0 0; box-sizing: border-box; display: grid; gap: 12px; }
+  .sheet h2 { margin: 0; font-size: 1.1rem; }
+  .sheet-link { display: block; text-decoration: none; color: #111827; padding: 14px 12px; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; }
   .empty { margin-top: 24px; color: #6b7280; font-size: 0.95rem; }
 
   .list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
