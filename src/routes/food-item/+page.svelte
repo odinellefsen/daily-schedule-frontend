@@ -50,26 +50,13 @@
   </section>
   {/if}
 
-  {#if data.nextCategories && data.nextCategories.length}
-  <section class="section">
-    <h2>Next</h2>
-    <ul class="chips">
-      {#each data.nextCategories as c}
-        <li>
-          <a class="chip" href={`/food-item?path=${encodeURIComponent([...(data.currentPath ?? []), c].join(' > '))}`}>{c}</a>
-        </li>
-      {/each}
-    </ul>
-  </section>
-  {/if}
-
   {#if data.levelItems && data.levelItems.length}
   <section class="section">
     <h2>Items</h2>
     <ul class="list">
       {#each data.levelItems as it}
         <li>
-          <a class="row" href={`/food-item/${it.id}`} aria-label={it.foodItemName}>
+          <a class="row" href={`/food-item/${it.id}?name=${encodeURIComponent(it.foodItemName)}`} aria-label={it.foodItemName}>
             <span class="title">{it.foodItemName}</span>
             <small class="meta">{it.hasUnits ? `${it.unitCount ?? 0} units` : 'no units'}</small>
           </a>

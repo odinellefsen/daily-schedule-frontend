@@ -71,16 +71,6 @@ export const load: PageServerLoad = async ({ fetch, locals, url }) => {
             return true;
         });
 
-        const nextIndex = currentPath.length;
-        const nextCategoriesSet = new Set<string>();
-        for (const it of scoped) {
-            const h = it.categoryHierarchy ?? [];
-            if (h.length > nextIndex) nextCategoriesSet.add(h[nextIndex]);
-        }
-        const nextCategories = Array.from(nextCategoriesSet).sort((a, b) =>
-            a.localeCompare(b)
-        );
-
         const levelItems = scoped.filter(
             (it) => (it.categoryHierarchy ?? []).length === currentPath.length
         );
@@ -101,7 +91,6 @@ export const load: PageServerLoad = async ({ fetch, locals, url }) => {
         return {
             isAuthed,
             currentPath,
-            nextCategories,
             levelItems,
             topCategories,
         };

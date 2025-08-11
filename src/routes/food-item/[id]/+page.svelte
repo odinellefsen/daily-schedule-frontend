@@ -4,6 +4,7 @@
 
   export let data: {
     isAuthed: boolean;
+    title?: string | null;
     item: { id: string; foodItemName: string; categoryHierarchy?: string[] | null } | null;
     units: Array<{
       id: string;
@@ -22,7 +23,7 @@
 <main class="wrap">
   <header class="top">
     <a class="back" href="/food-item" aria-label="Back">←</a>
-    <h1>{data.item?.foodItemName ?? 'Food Item'}</h1>
+    <h1>{data.item?.foodItemName ?? data.title ?? 'Food Item'}</h1>
     {#if data.isAuthed}
       <button class="fab" on:click={() => (showUnit = true)} aria-label="Add unit">＋</button>
     {/if}

@@ -61,13 +61,22 @@ export const load: PageServerLoad = async ({ fetch, params, locals, url }) => {
 
         const itemList = itemApi?.data ?? [];
         let item = itemList.find((f) => f.id === id) ?? null;
-        if (!item) {
-            const hintedName = url.searchParams.get("name");
-            if (hintedName) item = { id, foodItemName: hintedName } as FoodItem;
-        }
         const units = unitsApi?.data ?? [];
 
-        return { isAuthed, item, units };
+        const hintedName = url.searchParams.get("name");
+        if (hintedName) {
+            if (item) item.foodItemName = hintedName;
+            else item = { id, foodItemName: hintedName } as FoodItem;
+        } else if (!item && units.length && units[0]?.foodItemName) {
+            item = { id, foodItemName: units[0].foodItemName! } as FoodItem;
+        }
+
+        const title =
+            item?.foodItemName ??
+            hintedName ??
+            (units.length ? (units[0]?.foodItemName ?? null) : null);
+
+        return { isAuthed, item, units, title };
     } catch {
         return { isAuthed, item: null as FoodItem | null, units: [] as Unit[] };
     }
