@@ -53,13 +53,17 @@ export const load: PageServerLoad = async ({ fetch, params, locals, url }) => {
         ]);
 
         const itemApi = (await itemRes.json().catch(() => null)) as ApiResponse<
-            FoodItem[]
+            Array<FoodItem & { name?: string }>
         > | null;
         const unitsApi = (await unitsRes
             .json()
             .catch(() => null)) as ApiResponse<Unit[]> | null;
 
-        const itemList = itemApi?.data ?? [];
+        const itemList: FoodItem[] = (itemApi?.data ?? []).map((it: any) => ({
+            id: it.id,
+            foodItemName: it.foodItemName ?? it.name ?? "",
+            categoryHierarchy: it.categoryHierarchy ?? null,
+        }));
         let item = itemList.find((f) => f.id === id) ?? null;
         const units = unitsApi?.data ?? [];
 

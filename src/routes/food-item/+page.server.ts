@@ -49,13 +49,24 @@ export const load: PageServerLoad = async ({ fetch, locals, url }) => {
         });
 
         const api = (await res.json().catch(() => null)) as ApiResponse<
-            FoodItem[]
+            Array<FoodItem & { name?: string }>
         > | null;
+        console.log("[food-item] GET /api/food-item status=", res.status);
+        console.log("[food-item] GET /api/food-item body=", api);
         if (!res.ok || !api || api.success === false || !api.data) {
             return { isAuthed, items: [], topCategories: [], baseItems: [] };
         }
 
-        const items = api.data;
+        // Normalize API shape: backend returns `name`, our UI uses `foodItemName`
+        const items: FoodItem[] = (
+            api.data as Array<FoodItem & { name?: string }>
+        ).map((it) => ({
+            id: it.id,
+            foodItemName: (it as any).foodItemName ?? it.name ?? "",
+            categoryHierarchy: it.categoryHierarchy ?? null,
+            unitCount: it.unitCount,
+            hasUnits: it.hasUnits,
+        }));
 
         const currentPath =
             parseCategoryPath(url.searchParams.get("path")) ?? [];
