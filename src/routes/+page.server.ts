@@ -61,8 +61,6 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
                 : { "Content-Type": "application/json" },
         });
 
-        console.log("API response:", await res.json());
-
         const api = (await res.json().catch(() => null)) as {
             success: boolean;
             message?: string;
