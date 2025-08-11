@@ -72,7 +72,46 @@
         }
       }}>
         <h2>Add unit</h2>
-        <input name="unitOfMeasurement" placeholder="e.g. g, piece" aria-label="Unit of measurement" required />
+        <select name="unitOfMeasurement" aria-label="Unit of measurement" required>
+          <option value="" selected disabled>Select unit</option>
+          <optgroup label="Weight">
+            <option value="Gram">Gram</option>
+            <option value="Kilogram">Kilogram</option>
+          </optgroup>
+          <optgroup label="Volume">
+            <option value="Milliliter">Milliliter</option>
+            <option value="Liter">Liter</option>
+            <option value="Tablespoon">Tablespoon</option>
+            <option value="Teaspoon">Teaspoon</option>
+          </optgroup>
+          <optgroup label="Count">
+            <option value="Piece">Piece</option>
+            <option value="Whole">Whole</option>
+          </optgroup>
+          <optgroup label="Approximate">
+            <option value="Pinch">Pinch</option>
+            <option value="Handful">Handful</option>
+          </optgroup>
+          <optgroup label="Contextual">
+            <option value="Clove">Clove</option>
+            <option value="Slice">Slice</option>
+            <option value="Strip">Strip</option>
+            <option value="Head">Head</option>
+            <option value="Bunch">Bunch</option>
+          </optgroup>
+          <optgroup label="Flexible">
+            <option value="To taste">To taste</option>
+            <option value="As needed">As needed</option>
+          </optgroup>
+          <optgroup label="Beverage based">
+            <option value="Shot">Shot</option>
+            <option value="Dash">Dash</option>
+            <option value="Drop">Drop</option>
+            <option value="Splash">Splash</option>
+            <option value="Scoop">Scoop</option>
+            <option value="Drizzle">Drizzle</option>
+          </optgroup>
+        </select>
         <input name="unitDescription" placeholder="Description (optional)" aria-label="Description" />
         <div class="grid2">
           <input name="calories" type="number" step="1" inputmode="numeric" placeholder="kcal" aria-label="Calories" />
@@ -113,6 +152,7 @@
   .sheet { width: 100%; max-width: 100%; margin: 0; background: #fff; color: #111827; padding: 16px; border-radius: 16px 16px 0 0; box-sizing: border-box; display: grid; gap: 10px; }
   .sheet h2 { margin: 0 0 4px 0; font-size: 1.1rem; }
   .sheet input { font-size: 1rem; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; width: 100%; box-sizing: border-box; }
+  .sheet select { font-size: 1rem; padding: 12px; border-radius: 10px; border: 1px solid #e5e7eb; width: 100%; box-sizing: border-box; background: #fff; color: #111827; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .row-2 { display: flex; justify-content: flex-end; gap: 8px; }
   .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #fff; }
