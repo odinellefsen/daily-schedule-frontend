@@ -95,6 +95,49 @@ export const actions: Actions = {
             return fail(401, { message: "Please sign in to add units." });
         }
 
+        // Get the food item name from existing units or by fetching the food item
+        let foodItemName = "";
+
+        // Try to get food item name from existing units first
+        const unitsRes = await fetch(
+            `${apiBase}/api/food-item/${params.id}/units`,
+            {
+                headers: {
+                    Authorization: `Bearer ${locals.authToken}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        if (unitsRes.ok) {
+            const unitsApi = await unitsRes.json().catch(() => null);
+            const units = unitsApi?.data ?? [];
+            if (units.length > 0) {
+                foodItemName = units[0]?.foodItemName ?? "";
+            }
+        }
+
+        // If no units exist, get the name from the food item list
+        if (!foodItemName) {
+            const itemRes = await fetch(`${apiBase}/api/food-item`, {
+                headers: {
+                    Authorization: `Bearer ${locals.authToken}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (itemRes.ok) {
+                const itemApi = await itemRes.json().catch(() => null);
+                const itemList = itemApi?.data ?? [];
+                const item = itemList.find((f: any) => f.id === params.id);
+                foodItemName = item?.foodItemName ?? item?.name ?? "";
+            }
+        }
+
+        if (!foodItemName) {
+            return fail(400, { message: "Food item not found." });
+        }
+
         const form = await request.formData();
         const unitOfMeasurement = String(
             form.get("unitOfMeasurement") || ""
@@ -119,6 +162,7 @@ export const actions: Actions = {
         }
 
         const payload = {
+            foodItemName,
             units: [
                 {
                     unitOfMeasurement,
@@ -131,6 +175,11 @@ export const actions: Actions = {
             ],
         };
 
+        console.log(
+            `[add-unit] POST ${apiBase}/api/food-item/${params.id}/units`
+        );
+        console.log(`[add-unit] Payload:`, JSON.stringify(payload, null, 2));
+
         const res = await fetch(`${apiBase}/api/food-item/${params.id}/units`, {
             method: "POST",
             headers: {
@@ -140,12 +189,18 @@ export const actions: Actions = {
             body: JSON.stringify(payload),
         });
 
+        console.log(`[add-unit] Response status: ${res.status}`);
+
         if (!res.ok) {
             const body = await res.text().catch(() => "");
+            console.log(`[add-unit] Error response:`, body);
             return fail(res.status || 500, {
                 message: body || "Failed to add units",
             });
         }
+
+        const responseBody = await res.json().catch(() => null);
+        console.log(`[add-unit] Success response:`, responseBody);
 
         throw redirect(303, `/food-item/${params.id}`);
     },
