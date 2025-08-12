@@ -146,33 +146,50 @@ export const actions: Actions = {
             String(form.get("unitDescription") || "").trim() || undefined;
         const calories = form.get("calories")
             ? Number(form.get("calories"))
-            : undefined;
+            : 0; // Default to 0 instead of undefined
         const proteinInGrams = form.get("proteinInGrams")
             ? Number(form.get("proteinInGrams"))
-            : undefined;
+            : 0; // Default to 0 instead of undefined
         const carbohydratesInGrams = form.get("carbohydratesInGrams")
             ? Number(form.get("carbohydratesInGrams"))
-            : undefined;
+            : 0; // Default to 0 instead of undefined
         const fatInGrams = form.get("fatInGrams")
             ? Number(form.get("fatInGrams"))
-            : undefined;
+            : 0; // Default to 0 instead of undefined
 
         if (!unitOfMeasurement) {
             return fail(400, { message: "Unit of measurement is required." });
         }
 
+        // Create the unit object according to Zod schema (foodItemUnitBaseSchema)
+        const unit = {
+            unitOfMeasurement,
+            unitDescription,
+            nutritionPerOfThisUnit: {
+                calories: calories || 0, // Zod requires calories to be a number, not undefined
+                proteinInGrams,
+                carbohydratesInGrams,
+                fatInGrams,
+            },
+        };
+
+        // Remove undefined values to avoid Zod validation issues
+        Object.keys(unit).forEach((key) => {
+            if ((unit as any)[key] === undefined) {
+                delete (unit as any)[key];
+            }
+        });
+
+        // Clean up nutritionPerOfThisUnit object
+        Object.keys(unit.nutritionPerOfThisUnit).forEach((key) => {
+            if ((unit.nutritionPerOfThisUnit as any)[key] === undefined) {
+                delete (unit.nutritionPerOfThisUnit as any)[key];
+            }
+        });
+
         const payload = {
             foodItemName,
-            units: [
-                {
-                    unitOfMeasurement,
-                    unitDescription,
-                    calories,
-                    proteinInGrams,
-                    carbohydratesInGrams,
-                    fatInGrams,
-                },
-            ],
+            units: [unit],
         };
 
         console.log(
