@@ -1,14 +1,15 @@
 import type { PageServerLoad, Actions } from './$types';
 import type { FullRecipe, CreateIngredientsRequest, CreateInstructionsRequest, ApiResponse } from '$lib/types/recipe';
+import { env } from '$env/dynamic/private';
 
-const API_BASE = 'http://localhost:8787'; // Update this to match your API base URL
+const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:8787';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   let recipe: FullRecipe | null = null;
   let error: string | null = null;
 
   // Check if user is authenticated
-  const isAuthed = !!locals.auth;
+  const isAuthed = Boolean(locals.session);
   
   if (!isAuthed) {
     return {
@@ -19,7 +20,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   }
 
   try {
-    const token = await locals.auth?.getToken();
+    const token = locals.authToken;
     if (!token) {
       throw new Error('No authentication token available');
     }
@@ -54,10 +55,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
   addIngredients: async ({ request, locals, params }) => {
     try {
-      const token = await locals.auth?.getToken();
-      if (!token) {
+      if (!locals.session || !locals.authToken) {
         return { success: false, error: 'Not authenticated' };
       }
+
+      const token = locals.authToken;
 
       const formData = await request.formData();
       const ingredientEntries = formData.getAll('ingredientText') as string[];
@@ -112,10 +114,11 @@ export const actions: Actions = {
 
   addInstructions: async ({ request, locals, params }) => {
     try {
-      const token = await locals.auth?.getToken();
-      if (!token) {
+      if (!locals.session || !locals.authToken) {
         return { success: false, error: 'Not authenticated' };
       }
+
+      const token = locals.authToken;
 
       const formData = await request.formData();
       const instructionEntries = formData.getAll('stepInstruction') as string[];
