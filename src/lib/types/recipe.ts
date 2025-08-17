@@ -15,7 +15,6 @@ export interface RecipeMetadataType {
 export interface RecipeIngredient {
   id: string;
   ingredientText: string;
-  sortOrder: number;
 }
 
 export interface RecipeIngredientsType {

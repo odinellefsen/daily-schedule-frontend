@@ -32,9 +32,7 @@
   }
 
   function addIngredientInput() {
-    console.log('Adding ingredient input, current count:', ingredientInputs.length);
     ingredientInputs = [...ingredientInputs, ''];
-    console.log('New ingredient inputs:', ingredientInputs);
   }
 
   function removeIngredientInput(index: number) {
@@ -44,9 +42,7 @@
   }
 
   function addInstructionInput() {
-    console.log('Adding instruction input, current count:', instructionInputs.length);
     instructionInputs = [...instructionInputs, ''];
-    console.log('New instruction inputs:', instructionInputs);
   }
 
   function removeInstructionInput(index: number) {
@@ -175,7 +171,7 @@
           <ul class="ingredients-list">
             {#each recipe.ingredients || [] as ingredient, index}
               <li class="ingredient-item">
-                <span class="ingredient-number">{ingredient.sortOrder}</span>
+                <span class="ingredient-number">{index + 1}</span>
                 <span class="ingredient-text">{ingredient.ingredientText}</span>
               </li>
             {/each}

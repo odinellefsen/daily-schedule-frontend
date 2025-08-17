@@ -67,32 +67,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
   addIngredients: async ({ request, locals, params }) => {
     try {
-      console.log('🥕 Add ingredients action called for recipe:', params.id);
-      
       if (!locals.session || !locals.authToken) {
-        console.log('❌ Not authenticated for ingredients');
         return { success: false, error: 'Not authenticated' };
       }
 
       const token = locals.authToken;
 
       const formData = await request.formData();
-      console.log('📝 Ingredients form data received:', Object.fromEntries(formData.entries()));
-      
       const ingredientEntries = formData.getAll('ingredientText') as string[];
-      console.log('🔍 Raw ingredient entries:', ingredientEntries);
       
       const ingredients = ingredientEntries
         .filter(text => text.trim())
-        .map((text, index) => ({
-          ingredientText: text.trim(),
-          sortOrder: index + 1
+        .map((text) => ({
+          ingredientText: text.trim()
         }));
 
-      console.log('🍳 Processed ingredients to send:', ingredients);
-
       if (ingredients.length === 0) {
-        console.log('❌ No valid ingredients found');
         return { success: false, error: 'At least one ingredient is required' };
       }
 
