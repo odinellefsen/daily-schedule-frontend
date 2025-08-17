@@ -1,6 +1,6 @@
 import type { PageServerLoad, Actions } from './$types';
 import type { RecipeListItem, CreateRecipeRequest, ApiResponse } from '$lib/types/recipe';
-
+import { redirect } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 
 const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:3005';
@@ -108,11 +108,16 @@ export const actions: Actions = {
         };
       }
 
-      return { 
-        success: true, 
-        recipe: body.data,
-        message: 'Recipe created successfully' 
-      };
+      // Redirect to the newly created recipe detail page
+      if (body.data?.id) {
+        throw redirect(302, `/recipe/${body.data.id}`);
+      } else {
+        return { 
+          success: true, 
+          recipe: body.data,
+          message: 'Recipe created successfully' 
+        };
+      }
     } catch (err) {
       console.error('Error creating recipe:', err);
       return { 
