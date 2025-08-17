@@ -28,10 +28,15 @@
   let selectedTiming = data.timing || '';
 
   const timingOptions: { value: RecipeTimingType; label: string; icon: string; color: string }[] = [
-    { value: 'BREAKFAST', label: 'Breakfast', icon: '☀️', color: 'var(--color-warning)' },
-    { value: 'LUNCH', label: 'Lunch', icon: '🌞', color: 'var(--color-accent)' },
-    { value: 'DINNER', label: 'Dinner', icon: '🌙', color: 'var(--color-secondary)' },
-    { value: 'SNACK', label: 'Snack', icon: '🍎', color: 'var(--color-danger)' }
+    { value: 'Breakfast', label: 'Breakfast', icon: '☀️', color: 'var(--color-warning)' },
+    { value: 'Brunch', label: 'Brunch', icon: '🥐', color: 'var(--color-accent)' },
+    { value: 'Lunch', label: 'Lunch', icon: '🌞', color: 'var(--color-accent)' },
+    { value: 'Dinner', label: 'Dinner', icon: '🌙', color: 'var(--color-secondary)' },
+    { value: 'On The Go', label: 'On The Go', icon: '🚗', color: 'var(--color-secondary-light)' },
+    { value: 'Snack', label: 'Snack', icon: '🍎', color: 'var(--color-danger)' },
+    { value: 'Late Night', label: 'Late Night', icon: '🌃', color: 'var(--color-primary)' },
+    { value: 'Afternoon Tea', label: 'Afternoon Tea', icon: '🫖', color: 'var(--color-accent-light)' },
+    { value: 'Supper', label: 'Supper', icon: '🥘', color: 'var(--color-secondary)' }
   ];
 
   function getTimingInfo(timing: RecipeTimingType) {

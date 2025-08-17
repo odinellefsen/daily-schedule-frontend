@@ -1,6 +1,6 @@
 // Recipe types based on Daily Scheduler API contracts
 
-export type RecipeTimingType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
+export type RecipeTimingType = 'Breakfast' | 'Brunch' | 'Lunch' | 'Dinner' | 'On The Go' | 'Snack' | 'Late Night' | 'Afternoon Tea' | 'Supper';
 
 export interface RecipeMetadataType {
   id: string;
