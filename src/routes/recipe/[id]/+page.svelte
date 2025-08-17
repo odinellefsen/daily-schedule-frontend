@@ -58,7 +58,7 @@
 
   $: recipe = data.recipe;
   $: hasIngredients = recipe?.ingredients && recipe.ingredients.length > 0;
-  $: hasInstructions = recipe?.instructions && recipe.instructions.length > 0;
+  $: hasInstructions = recipe?.steps && recipe.steps.length > 0;
   $: isComplete = hasIngredients && hasInstructions;
 </script>
 
@@ -212,16 +212,16 @@
 
         {#if hasInstructions}
           <ol class="instructions-list">
-            {#each (recipe.instructions || []).sort((a, b) => a.stepNumber - b.stepNumber) as instruction}
+            {#each (recipe.steps || []).sort((a, b) => a.stepNumber - b.stepNumber) as step}
               <li class="instruction-item">
-                <span class="instruction-number">{instruction.stepNumber}</span>
+                <span class="instruction-number">{step.stepNumber}</span>
                 <div class="instruction-content">
-                  <p class="instruction-text">{instruction.stepInstruction}</p>
-                  {#if instruction.ingredientsUsedInStep?.length}
+                  <p class="instruction-text">{step.instruction}</p>
+                  {#if step.ingredientsUsedInStep?.length}
                     <div class="step-ingredients">
                       <span class="step-ingredients-label">Ingredients for this step:</span>
                       <!-- Note: This would need additional API data to show ingredient details -->
-                      <span class="step-ingredients-count">{instruction.ingredientsUsedInStep.length} items</span>
+                      <span class="step-ingredients-count">{step.ingredientsUsedInStep.length} items</span>
                     </div>
                   {/if}
                 </div>

@@ -31,7 +31,7 @@ export interface IngredientUsedInStep {
 export interface RecipeInstruction {
   id?: string;
   stepNumber: number;
-  stepInstruction: string;
+  instruction: string;
   ingredientsUsedInStep?: IngredientUsedInStep[];
 }
 
@@ -54,7 +54,13 @@ export interface RecipeListItem {
 
 export interface FullRecipe extends RecipeMetadataType {
   ingredients?: RecipeIngredient[];
-  instructions?: RecipeInstruction[];
+  steps?: RecipeInstruction[];
+  metadata?: {
+    stepCount?: number;
+    ingredientCount?: number;
+    estimatedTotalTime?: number | null;
+  };
+  version?: number;
 }
 
 // Request types for creating recipes
