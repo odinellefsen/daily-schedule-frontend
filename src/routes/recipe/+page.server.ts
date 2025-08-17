@@ -110,8 +110,10 @@ export const actions: Actions = {
 
       // Redirect to the newly created recipe detail page
       if (body.data?.id) {
+        console.log('✅ Recipe created successfully, redirecting to:', `/recipe/${body.data.id}`);
         throw redirect(302, `/recipe/${body.data.id}`);
       } else {
+        console.log('⚠️ Recipe created but no ID returned:', body.data);
         return { 
           success: true, 
           recipe: body.data,
@@ -119,6 +121,10 @@ export const actions: Actions = {
         };
       }
     } catch (err) {
+      // Don't log redirect as an error
+      if (err instanceof Response && err.status === 302) {
+        throw err;
+      }
       console.error('Error creating recipe:', err);
       return { 
         success: false, 

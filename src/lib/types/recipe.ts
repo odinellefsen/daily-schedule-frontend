@@ -69,7 +69,6 @@ export interface CreateIngredientsRequest {
   recipeId: string;
   ingredients: {
     ingredientText: string;
-    sortOrder: number;
   }[];
 }
 

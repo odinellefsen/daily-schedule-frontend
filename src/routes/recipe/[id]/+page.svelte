@@ -44,7 +44,9 @@
   }
 
   function addInstructionInput() {
+    console.log('Adding instruction input, current count:', instructionInputs.length);
     instructionInputs = [...instructionInputs, ''];
+    console.log('New instruction inputs:', instructionInputs);
   }
 
   function removeInstructionInput(index: number) {

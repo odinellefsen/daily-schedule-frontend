@@ -67,14 +67,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
   addIngredients: async ({ request, locals, params }) => {
     try {
+      console.log('🥕 Add ingredients action called for recipe:', params.id);
+      
       if (!locals.session || !locals.authToken) {
+        console.log('❌ Not authenticated for ingredients');
         return { success: false, error: 'Not authenticated' };
       }
 
       const token = locals.authToken;
 
       const formData = await request.formData();
+      console.log('📝 Ingredients form data received:', Object.fromEntries(formData.entries()));
+      
       const ingredientEntries = formData.getAll('ingredientText') as string[];
+      console.log('🔍 Raw ingredient entries:', ingredientEntries);
       
       const ingredients = ingredientEntries
         .filter(text => text.trim())
@@ -83,7 +89,10 @@ export const actions: Actions = {
           sortOrder: index + 1
         }));
 
+      console.log('🍳 Processed ingredients to send:', ingredients);
+
       if (ingredients.length === 0) {
+        console.log('❌ No valid ingredients found');
         return { success: false, error: 'At least one ingredient is required' };
       }
 
@@ -101,9 +110,28 @@ export const actions: Actions = {
         body: JSON.stringify(requestData)
       });
 
-      const body: ApiResponse = await response.json();
+      console.log('🌐 Ingredients API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: `${API_BASE}/api/recipe/ingredients`
+      });
+
+      const responseText = await response.text();
+      console.log('📄 Ingredients API Response Text:', responseText);
+
+      let body: ApiResponse;
+      try {
+        body = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse ingredients response as JSON:', parseError);
+        return { 
+          success: false, 
+          error: `API returned invalid JSON. Status: ${response.status}, Response: ${responseText.slice(0, 200)}...`
+        };
+      }
 
       if (!response.ok || !body.success) {
+        console.log('❌ Ingredients creation failed:', body);
         return { 
           success: false, 
           error: body.message || 'Failed to add ingredients',
@@ -111,6 +139,7 @@ export const actions: Actions = {
         };
       }
 
+      console.log('✅ Ingredients added successfully:', body.data);
       return { 
         success: true, 
         message: 'Ingredients added successfully' 
@@ -126,14 +155,20 @@ export const actions: Actions = {
 
   addInstructions: async ({ request, locals, params }) => {
     try {
+      console.log('📋 Add instructions action called for recipe:', params.id);
+      
       if (!locals.session || !locals.authToken) {
+        console.log('❌ Not authenticated for instructions');
         return { success: false, error: 'Not authenticated' };
       }
 
       const token = locals.authToken;
 
       const formData = await request.formData();
+      console.log('📝 Instructions form data received:', Object.fromEntries(formData.entries()));
+      
       const instructionEntries = formData.getAll('stepInstruction') as string[];
+      console.log('🔍 Raw instruction entries:', instructionEntries);
       
       const stepByStepInstructions = instructionEntries
         .filter(instruction => instruction.trim())
@@ -142,7 +177,10 @@ export const actions: Actions = {
           stepInstruction: instruction.trim()
         }));
 
+      console.log('📚 Processed instructions to send:', stepByStepInstructions);
+
       if (stepByStepInstructions.length === 0) {
+        console.log('❌ No valid instructions found');
         return { success: false, error: 'At least one instruction step is required' };
       }
 
@@ -160,9 +198,28 @@ export const actions: Actions = {
         body: JSON.stringify(requestData)
       });
 
-      const body: ApiResponse = await response.json();
+      console.log('🌐 Instructions API Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: `${API_BASE}/api/recipe/instructions`
+      });
+
+      const responseText = await response.text();
+      console.log('📄 Instructions API Response Text:', responseText);
+
+      let body: ApiResponse;
+      try {
+        body = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse instructions response as JSON:', parseError);
+        return { 
+          success: false, 
+          error: `API returned invalid JSON. Status: ${response.status}, Response: ${responseText.slice(0, 200)}...`
+        };
+      }
 
       if (!response.ok || !body.success) {
+        console.log('❌ Instructions creation failed:', body);
         return { 
           success: false, 
           error: body.message || 'Failed to add instructions',
@@ -170,6 +227,7 @@ export const actions: Actions = {
         };
       }
 
+      console.log('✅ Instructions added successfully:', body.data);
       return { 
         success: true, 
         message: 'Instructions added successfully' 
