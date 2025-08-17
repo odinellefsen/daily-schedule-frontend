@@ -3,7 +3,7 @@ import type { RecipeListItem, CreateRecipeRequest, ApiResponse } from '$lib/type
 
 import { env } from '$env/dynamic/private';
 
-const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:8787';
+const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:3005';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   let recipes: RecipeListItem[] = [];

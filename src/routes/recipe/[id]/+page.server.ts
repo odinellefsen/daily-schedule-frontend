@@ -2,7 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import type { FullRecipe, CreateIngredientsRequest, CreateInstructionsRequest, ApiResponse } from '$lib/types/recipe';
 import { env } from '$env/dynamic/private';
 
-const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:8787';
+const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:3005';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   let recipe: FullRecipe | null = null;
