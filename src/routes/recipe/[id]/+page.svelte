@@ -169,9 +169,8 @@
 
         {#if hasIngredients}
           <ul class="ingredients-list">
-            {#each recipe.ingredients || [] as ingredient, index}
+            {#each recipe.ingredients || [] as ingredient}
               <li class="ingredient-item">
-                <span class="ingredient-number">{index + 1}</span>
                 <span class="ingredient-text">{ingredient.ingredientText}</span>
               </li>
             {/each}
