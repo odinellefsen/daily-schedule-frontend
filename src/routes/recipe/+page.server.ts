@@ -9,7 +9,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
   let recipes: RecipeListItem[] = [];
   let error: string | null = null;
 
-  // Check if user is authenticated
   const isAuthed = Boolean(locals.session);
   
   if (!isAuthed) {
@@ -26,12 +25,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
       throw new Error('No authentication token available');
     }
 
-    // Get search parameters
     const searchQuery = url.searchParams.get('q');
     const timing = url.searchParams.get('timing');
 
-    // Build the API URL
-    let apiUrl = `${API_BASE}/api/recipe/`;
+    let apiUrl = `${API_BASE}/api/recipe`;
     if (searchQuery || timing) {
       apiUrl = `${API_BASE}/api/recipe/search?`;
       const params = new URLSearchParams();
@@ -47,10 +44,18 @@ export const load: PageServerLoad = async ({ locals, url }) => {
       },
     });
 
-    const body: ApiResponse<RecipeListItem[]> = await response.json();
+    const responseText = await response.text();
+
+    let body: ApiResponse<RecipeListItem[]>;
+    try {
+      body = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse response as JSON:', parseError);
+      throw new Error(`API returned invalid JSON. Status: ${response.status}, Response: ${responseText.slice(0, 200)}...`);
+    }
 
     if (!response.ok || !body.success) {
-      throw new Error(body.message || 'Failed to fetch recipes');
+      throw new Error(body.message || `API request failed with status ${response.status}`);
     }
 
     recipes = body.data || [];
@@ -84,7 +89,7 @@ export const actions: Actions = {
         whenIsItConsumed: formData.getAll('whenIsItConsumed') as any[] || undefined
       };
 
-      const response = await fetch(`${API_BASE}/api/recipe/`, {
+      const response = await fetch(`${API_BASE}/api/recipe`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

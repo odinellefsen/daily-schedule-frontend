@@ -32,6 +32,18 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       },
     });
 
+    // Handle 404 case gracefully (endpoint not implemented yet)
+    if (response.status === 404) {
+      console.log('Recipe API endpoints not implemented yet (404).');
+      recipe = null;
+      error = 'Recipe functionality is not yet available. The API endpoints are still being implemented.';
+      return {
+        isAuthed: true,
+        recipe,
+        error
+      };
+    }
+
     const body: ApiResponse<FullRecipe> = await response.json();
 
     if (!response.ok || !body.success) {

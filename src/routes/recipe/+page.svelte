@@ -112,10 +112,15 @@
 
   {#if data.error}
     <div class="error-state">
-      <div class="error-icon">⚠️</div>
-      <h2 class="error-title">Something went wrong</h2>
+      <div class="error-icon">{data.error.includes('not yet available') ? '🚧' : '⚠️'}</div>
+      <h2 class="error-title">{data.error.includes('not yet available') ? 'Coming Soon' : 'Something went wrong'}</h2>
       <p class="error-text">{data.error}</p>
-      <button class="error-retry" on:click={() => invalidateAll()}>Try again</button>
+      {#if data.error.includes('not yet available')}
+        <p class="error-text">The recipe endpoints will be implemented in the Daily Scheduler API soon. For now, you can use the food items and todos features.</p>
+        <a href="/food" class="error-retry">Explore Food Items</a>
+      {:else}
+        <button class="error-retry" on:click={() => invalidateAll()}>Try again</button>
+      {/if}
     </div>
   {:else if !data.isAuthed}
     <div class="welcome-state">
