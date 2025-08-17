@@ -22,17 +22,30 @@ export interface RecipeIngredientsType {
   ingredients: RecipeIngredient[];
 }
 
-export interface IngredientUsedInStep {
-  foodItemId: string;
+export interface FoodItemUnitUsedInStep {
   foodItemUnitId: string;
   quantityOfFoodItemUnit: number;
+}
+
+export interface FoodItemUnit {
+  id: string;
+  foodItemId: string;
+  foodItemName: string;
+  unitOfMeasurement: string;
+  unitDescription: string;
+  calories: number;
+  proteinInGrams: number;
+  carbohydratesInGrams: number;
+  fatInGrams: number;
+  fiberInGrams: number;
+  sugarInGrams: number;
 }
 
 export interface RecipeInstruction {
   id?: string;
   stepNumber: number;
   instruction: string;
-  ingredientsUsedInStep?: IngredientUsedInStep[];
+  foodItemUnitsUsedInStep?: FoodItemUnitUsedInStep[];
 }
 
 export interface RecipeInstructionsType {
@@ -80,9 +93,8 @@ export interface CreateIngredientsRequest {
 export interface CreateInstructionsRequest {
   recipeId: string;
   stepByStepInstructions: {
-    stepNumber: number;
     stepInstruction: string;
-    ingredientsUsedInStep?: IngredientUsedInStep[];
+    foodItemUnitsUsedInStep?: FoodItemUnitUsedInStep[];
   }[];
 }
 

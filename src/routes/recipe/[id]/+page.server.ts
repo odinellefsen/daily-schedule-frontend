@@ -1,11 +1,12 @@
 import type { PageServerLoad, Actions } from './$types';
-import type { FullRecipe, CreateIngredientsRequest, CreateInstructionsRequest, ApiResponse } from '$lib/types/recipe';
+import type { FullRecipe, CreateIngredientsRequest, CreateInstructionsRequest, ApiResponse, FoodItemUnit } from '$lib/types/recipe';
 import { env } from '$env/dynamic/private';
 
 const API_BASE = (env.DAILY_SCHEDULER_API_BASE as string | undefined) ?? 'http://localhost:3005';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
   let recipe: FullRecipe | null = null;
+  let foodItemUnits: FoodItemUnit[] = [];
   let error: string | null = null;
 
   // Check if user is authenticated
@@ -15,6 +16,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     return {
       isAuthed: false,
       recipe: null,
+      foodItemUnits: [],
       error: 'Authentication required'
     };
   }
@@ -51,6 +53,27 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     }
 
     recipe = body.data || null;
+
+    // Also fetch food item units for search functionality
+    try {
+      const unitsResponse = await fetch(`${API_BASE}/api/food-item/units`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (unitsResponse.ok) {
+        const unitsBody: ApiResponse<FoodItemUnit[]> = await unitsResponse.json();
+        if (unitsBody.success) {
+          foodItemUnits = unitsBody.data || [];
+        }
+      }
+    } catch (unitsErr) {
+      console.warn('Failed to load food item units for search:', unitsErr);
+      // Don't fail the whole page if units can't be loaded
+    }
+
   } catch (err) {
     console.error('Error loading recipe:', err);
     error = err instanceof Error ? err.message : 'Failed to load recipe';
@@ -59,6 +82,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   return {
     isAuthed: true,
     recipe,
+    foodItemUnits,
     error,
     recipeId: params.id
   };
@@ -162,8 +186,7 @@ export const actions: Actions = {
       
       const stepByStepInstructions = instructionEntries
         .filter(instruction => instruction.trim())
-        .map((instruction, index) => ({
-          stepNumber: index + 1,
+        .map((instruction) => ({
           stepInstruction: instruction.trim()
         }));
 

@@ -1,11 +1,12 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
-  import type { FullRecipe, RecipeTimingType } from '$lib/types/recipe';
+  import type { FullRecipe, RecipeTimingType, FoodItemUnit } from '$lib/types/recipe';
 
   export let data: {
     isAuthed: boolean;
     recipe: FullRecipe | null;
+    foodItemUnits: FoodItemUnit[];
     error: string | null;
     recipeId: string;
   };
@@ -217,11 +218,11 @@
                 <span class="instruction-number">{step.stepNumber}</span>
                 <div class="instruction-content">
                   <p class="instruction-text">{step.instruction}</p>
-                  {#if step.ingredientsUsedInStep?.length}
+                  {#if step.foodItemUnitsUsedInStep?.length}
                     <div class="step-ingredients">
-                      <span class="step-ingredients-label">Ingredients for this step:</span>
+                      <span class="step-ingredients-label">Food items for this step:</span>
                       <!-- Note: This would need additional API data to show ingredient details -->
-                      <span class="step-ingredients-count">{step.ingredientsUsedInStep.length} items</span>
+                      <span class="step-ingredients-count">{step.foodItemUnitsUsedInStep.length} items</span>
                     </div>
                   {/if}
                 </div>
